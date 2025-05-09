@@ -13,7 +13,7 @@ import HealthKit
 @MainActor
 class ContentViewModel: ObservableObject {
     @Published var isAuthorized = false
-    @Published var stepCount: Double = 0.0
+    @Published var allData: [String: String] = [:]
     let healthKitManager = HealthKitManager()
 
     func requestHealthKit() {
@@ -21,15 +21,15 @@ class ContentViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self?.isAuthorized = success
                 if success {
-                    self?.fetchSteps()
+                    self?.fetchAllData()
                 }
             }
         }
     }
 
-    func fetchSteps() {
-        healthKitManager.fetchStepCount()
-        self.stepCount = healthKitManager.stepCount
+    func fetchAllData() {
+        healthKitManager.fetchAllData()
+        self.allData = healthKitManager.allData
     }
 }
 
@@ -63,10 +63,22 @@ struct ContentView: View {
             }
             Section(header: Text("Apple HealthKit Integration")) {
                 if viewModel.isAuthorized {
-                    VStack {
-                        Text("Today's Step Count: \(viewModel.healthKitManager.stepCount, specifier: "%.0f")")
-                        Button("Refresh Steps") {
-                            viewModel.fetchSteps()
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Health Data Overview:").bold()
+                        if viewModel.healthKitManager.allData.isEmpty {
+                            Text("No data available.")
+                        } else {
+                            ForEach(Array(viewModel.healthKitManager.allData.keys.sorted()), id: \.self) { key in
+                                HStack {
+                                    Text(key).fontWeight(.semibold)
+                                    Spacer()
+                                    Text(viewModel.healthKitManager.allData[key] ?? "-")
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+                        Button("Refresh Data") {
+                            viewModel.fetchAllData()
                         }
                     }
                 } else {
