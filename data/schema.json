@@ -1,0 +1,965 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "generalInformation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "insurance": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string"
+              },
+              "insuranceNumber": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "appleHealth": {
+        "type": "object",
+        "properties": {
+          "activity": {
+            "type": "object",
+            "properties": {
+              "stepCount": {
+                "type": "number"
+              },
+              "walkingDistance": {
+                "type": "number"
+              },
+              "runningDistance": {
+                "type": "number"
+              },
+              "flightsClimbed": {
+                "type": "number"
+              },
+              "activeEnergyBurned": {
+                "type": "number"
+              },
+              "exerciseMinutes": {
+                "type": "number"
+              },
+              "standHours": {
+                "type": "number"
+              }
+            }
+          },
+          "bodyMeasurements": {
+            "type": "object",
+            "properties": {
+              "height": {
+                "type": "number"
+              },
+              "weight": {
+                "type": "number"
+              },
+              "bodyMassIndex": {
+                "type": "number"
+              },
+              "bodyFatPercentage": {
+                "type": "number"
+              },
+              "leanBodyMass": {
+                "type": "number"
+              },
+              "waistCircumference": {
+                "type": "number"
+              }
+            }
+          },
+          "cycleTracking": {
+            "type": "object",
+            "properties": {
+              "menstrualFlow": {
+                "type": "string"
+              },
+              "basalBodyTemperature": {
+                "type": "number"
+              },
+              "ovulationTestResult": {
+                "type": "string"
+              },
+              "cervicalMucusQuality": {
+                "type": "string"
+              },
+              "sexualActivity": {
+                "type": "boolean"
+              }
+            }
+          },
+          "hearing": {
+            "type": "object",
+            "properties": {
+              "headphoneAudioLevels": {
+                "type": "number"
+              },
+              "environmentalSoundLevels": {
+                "type": "number"
+              },
+              "hearingDeviceAudioLevels": {
+                "type": "number"
+              }
+            }
+          },
+          "heart": {
+            "type": "object",
+            "properties": {
+              "heartRate": {
+                "type": "number"
+              },
+              "restingHeartRate": {
+                "type": "number"
+              },
+              "walkingHeartRateAverage": {
+                "type": "number"
+              },
+              "heartRateVariability": {
+                "type": "number"
+              },
+              "electrocardiogram": {
+                "type": "object",
+                "properties": {
+                  "classification": {
+                    "type": "string"
+                  },
+                  "averageHeartRate": {
+                    "type": "number"
+                  },
+                  "samplingFrequency": {
+                    "type": "number"
+                  },
+                  "voltageMeasurements": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "medicationName": {
+                  "type": "string"
+                },
+                "dosage": {
+                  "type": "string"
+                },
+                "frequency": {
+                  "type": "string"
+                },
+                "route": {
+                  "type": "string"
+                },
+                "startDate": {
+                  "type": "string"
+                },
+                "endDate": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "mentalWellbeing": {
+            "type": "object",
+            "properties": {
+              "mindfulnessMinutes": {
+                "type": "number"
+              },
+              "moodTracking": {
+                "type": "string"
+              },
+              "stressLevel": {
+                "type": "string"
+              },
+              "anxietyTestResult": {
+                "type": "string"
+              },
+              "depressionTestResult": {
+                "type": "string"
+              }
+            }
+          },
+          "mobility": {
+            "type": "object",
+            "properties": {
+              "walkingSpeed": {
+                "type": "number"
+              },
+              "stepLength": {
+                "type": "number"
+              },
+              "doubleSupportTime": {
+                "type": "number"
+              },
+              "walkingAsymmetry": {
+                "type": "number"
+              },
+              "walkingSteadiness": {
+                "type": "string"
+              }
+            }
+          },
+          "nutrition": {
+            "type": "object",
+            "properties": {
+              "calories": {
+                "type": "number"
+              },
+              "carbohydrates": {
+                "type": "number"
+              },
+              "protein": {
+                "type": "number"
+              },
+              "fat": {
+                "type": "number"
+              },
+              "fiber": {
+                "type": "number"
+              },
+              "sugar": {
+                "type": "number"
+              },
+              "sodium": {
+                "type": "number"
+              },
+              "water": {
+                "type": "number"
+              }
+            }
+          },
+          "respiratory": {
+            "type": "object",
+            "properties": {
+              "respiratoryRate": {
+                "type": "number"
+              },
+              "oxygenSaturation": {
+                "type": "number"
+              },
+              "peakExpiratoryFlowRate": {
+                "type": "number"
+              }
+            }
+          },
+          "sleep": {
+            "type": "object",
+            "properties": {
+              "inBedTime": {
+                "type": "string"
+              },
+              "asleepTime": {
+                "type": "string"
+              },
+              "sleepDuration": {
+                "type": "number"
+              },
+              "sleepStages": {
+                "type": "object",
+                "properties": {
+                  "core": {
+                    "type": "number"
+                  },
+                  "deep": {
+                    "type": "number"
+                  },
+                  "rem": {
+                    "type": "number"
+                  },
+                  "awake": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "symptoms": {
+            "type": "object",
+            "properties": {
+              "headache": {
+                "type": "boolean"
+              },
+              "fatigue": {
+                "type": "boolean"
+              },
+              "fever": {
+                "type": "boolean"
+              },
+              "chills": {
+                "type": "boolean"
+              },
+              "cough": {
+                "type": "boolean"
+              },
+              "shortnessOfBreath": {
+                "type": "boolean"
+              },
+              "nausea": {
+                "type": "boolean"
+              },
+              "diarrhea": {
+                "type": "boolean"
+              }
+            }
+          },
+          "vitals": {
+            "type": "object",
+            "properties": {
+              "bloodPressure": {
+                "type": "object",
+                "properties": {
+                  "systolic": {
+                    "type": "number"
+                  },
+                  "diastolic": {
+                    "type": "number"
+                  }
+                }
+              },
+              "bodyTemperature": {
+                "type": "number"
+              },
+              "bloodOxygenSaturation": {
+                "type": "number"
+              },
+              "bloodGlucose": {
+                "type": "array",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "otherData": {
+            "type": "object",
+            "properties": {
+              "handwashingDuration": {
+                "type": "number"
+              },
+              "timeInDaylight": {
+                "type": "number"
+              },
+              "uvExposure": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "vaccinations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "doctor": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      },
+      "medicalHistory": {
+        "type": "object",
+        "properties": {
+          "bloodPanels": {
+            "type": "array",
+            "items": {
+              "hemoglobin": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "hematocrit": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "erythrocytes": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "leukocytes": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "platelets": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "MCV": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "MCH": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "MCHC": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "neutrophils": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "lymphocytes": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "monocytes": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "eosinophils": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "basophils": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "reticulocytes": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              },
+              "CRP": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ]
+              }
+            }
+          },
+          "clinicalReports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "doctor": {
+                  "type": "string"
+                },
+                "clinic": {
+                  "type": "string"
+                },
+                "recipient": {
+                  "type": "string"
+                },
+                "diagnosis": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "anamneses": {
+                  "type": "string"
+                },
+                "otherFindings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "test": {
+                        "type": "string"
+                      },
+                      "testDiagnosis": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "date",
+                      "test",
+                      "testDiagnosis"
+                    ]
+                  }
+                },
+                "medications": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "medicationName": {
+                        "type": "string"
+                      },
+                      "dosage": {
+                        "type": "string"
+                      },
+                      "frequency": {
+                        "type": "string"
+                      },
+                      "route": {
+                        "type": "string"
+                      },
+                      "startDate": {
+                        "type": "string"
+                      },
+                      "endDate": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "laboratory": {
+                  "type": "array",
+                  "items": {
+                    "hemoglobin": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "hematocrit": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "erythrocytes": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "leukocytes": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "platelets": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "MCV": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "MCH": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "MCHC": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "neutrophils": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "lymphocytes": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "monocytes": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "eosinophils": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "basophils": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "reticulocytes": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    },
+                    "CRP": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "unit"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "doctorLetters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sender": {
+                  "type": "string"
+                },
+                "recipient": {
+                  "type": "string"
+                },
+                "diagnosis": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "items": {
+                    "name": {
+                      "type": "string "
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "reasonsForVisit": {
+        "type": "string"
+      },
+      "additionalComments": {
+        "type": "string"
+      }
+    }
+  }
