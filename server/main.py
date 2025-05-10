@@ -1,37 +1,20 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
-from typing import Dict, Any
 from models import (
-    Insurance,
     GeneralInformation,
-    Activity,
-    BodyMeasurements,
-    CycleTracking,
-    Hearing,
-    Electrocardiogram,
-    Heart,
-    Medication,
-    MentalWellbeing,
-    Mobility,
-    Nutrition,
-    Respiratory,
-    SleepStages,
-    Sleep,
-    Symptoms,
-    BloodPressure,
-    Vitals,
-    OtherData,
     AppleHealth,
     Vaccination,
-    MedicalHistory,
     ReasonsForVisit,
-    AdditionalComments
+    AdditionalComments,
+    BloodPanel,
+    ClinicalReport,
+    DoctorLetter,
 )
-from llm import get_vac_from_images
-import base64
 import logging
-import fitz
-
+# ------------------------------------------------------
+import llm
+import utils
+# ------------------------------------------------------
 app = FastAPI()
 
 data_store = {}
@@ -69,42 +52,24 @@ async def get_apple_health():
 @app.post("/post/vaccinations")
 async def post_vaccinations(files: list[UploadFile] = File(...)):
     logging.info("POST /post/vaccinations called with %d files", len(files))
-    images = []
-    for file in files:
-        image_bytes = await file.read()
-
-        # Support for PDF files
-        if file.content_type == "application/pdf":
-            try:
-                with fitz.open(stream=image_bytes, filetype="pdf") as doc:
-                    for page in doc:
-                        pix = page.get_pixmap(dpi=200)
-                        img_bytes = pix.tobytes("jpeg")
-                        base64_jpg = base64.b64encode(img_bytes).decode("utf-8")
-                        images.append({
-                            "type": "image_url",
-                            "image_url": f"data:image/jpeg;base64,{base64_jpg}"
-                        })
-            except Exception as e:
-                logging.error("Failed to convert PDF to JPG: %s", e)
-                raise HTTPException(status_code=400, detail=f"Failed to convert PDF to JPG: {e}")
-
-        # Support for image files
-        else:
-            base64_image = base64.b64encode(image_bytes).decode("utf-8")
-            images.append({
-                "type": "image_url",
-                "image_url": f"data:{file.content_type};base64,{base64_image}"
-            })
-
+    # ----------------------------------------------------------
+    # Convert files to base64
     try:
-        vaccinations: list[Vaccination] = get_vac_from_images(images)
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    # Read the images
+    try:
+        vaccinations: list[Vaccination] = llm.image2struct(images, Vaccination, llm.vax_prompt, "Vaccinations")
         logging.info("Vaccination extraction successful, %d records found", len(vaccinations))
     except Exception as e:
         logging.error("LLM extraction failed: %s", e)
         raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
     data_store["vaccinations"] = [v.model_dump() for v in vaccinations]
-    return JSONResponse(content={"message": "vaccinations saved successfully.", "vaccinations": data_store["vaccinations"]})
+    return JSONResponse(content={"message": "vaccinations saved successfully.", "data": data_store["vaccinations"]})
 
 @app.get("/get/vaccinations")
 async def get_vaccinations():
@@ -114,25 +79,11 @@ async def get_vaccinations():
         raise HTTPException(status_code=404, detail="vaccinations not found")
     return JSONResponse(content=data_store["vaccinations"])
 
-@app.post("/post/medicalHistory")
-async def post_medical_history(payload: MedicalHistory):
-    logging.info("POST /post/medicalHistory called with payload: %s", payload.model_dump())
-    data_store["medicalHistory"] = payload.model_dump()
-    return JSONResponse(content={"message": "medicalHistory saved successfully."})
-
-@app.get("/get/medicalHistory")
-async def get_medical_history():
-    logging.info("GET /get/medicalHistory called")
-    if "medicalHistory" not in data_store:
-        logging.warning("medicalHistory not found in data_store")
-        raise HTTPException(status_code=404, detail="medicalHistory not found")
-    return JSONResponse(content=data_store["medicalHistory"])
-
 @app.post("/post/reasonsForVisit")
 async def post_reasons_for_visit(payload: ReasonsForVisit):
     logging.info("POST /post/reasonsForVisit called with payload: %s", payload.model_dump())
     data_store["reasonsForVisit"] = payload.model_dump()
-    return JSONResponse(content={"message": "reasonsForVisit saved successfully."})
+    return JSONResponse(content={"message": "reasonsForVisit saved successfully.", "data": data_store["reasonsForVisit"]})
 
 @app.get("/get/reasonsForVisit")
 async def get_reasons_for_visit():
@@ -146,7 +97,7 @@ async def get_reasons_for_visit():
 async def post_additional_comments(payload: AdditionalComments):
     logging.info("POST /post/additionalComments called with payload: %s", payload.model_dump())
     data_store["additionalComments"] = payload.model_dump()
-    return JSONResponse(content={"message": "additionalComments saved successfully."})
+    return JSONResponse(content={"message": "additionalComments saved successfully.", "data": data_store["additionalComments"]})
 
 @app.get("/get/additionalComments")
 async def get_additional_comments():
@@ -155,3 +106,89 @@ async def get_additional_comments():
         logging.warning("additionalComments not found in data_store")
         raise HTTPException(status_code=404, detail="additionalComments not found")
     return JSONResponse(content=data_store["additionalComments"])
+
+@app.post("/post/bloodPanels")
+async def post_blood_panels(files: list[UploadFile] = File(...)):
+    logging.info("POST /post/bloodPanels called with %d files", len(files))
+    # ----------------------------------------------------------
+    # Convert files to base64
+    try:
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    # Read the images
+    try:
+        blood_panels: list[BloodPanel] = llm.image2struct(images, BloodPanel, llm.blood_panel_prompt, "Blood Panels")
+        logging.info("Blood panel extraction successful, %d records found", len(blood_panels))
+    except Exception as e:
+        logging.error("LLM extraction failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
+    data_store["bloodPanels"] = [p.model_dump() for p in blood_panels]
+    return JSONResponse(content={"message": "bloodPanels saved successfully.", "data": data_store["bloodPanels"]})
+
+@app.get("/get/bloodPanels")
+async def get_blood_panels():
+    logging.info("GET /get/bloodPanels called")
+    if "bloodPanels" not in data_store:
+        logging.warning("bloodPanels not found in data_store")
+        raise HTTPException(status_code=404, detail="bloodPanels not found")
+    return JSONResponse(content=data_store["bloodPanels"])
+
+@app.post("/post/clinicalReports")
+async def post_clinical_reports(files: list[UploadFile] = File(...)):
+    logging.info("POST /post/clinicalReports called with %d files", len(files))
+    # ----------------------------------------------------------
+    try:
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    try:
+        clinical_reports: list[ClinicalReport] = llm.image2struct(images, ClinicalReport, llm.clinical_report_prompt, "ClinicalReports")
+        logging.info("Clinical report extraction successful, %d records found", len(clinical_reports))
+    except Exception as e:
+        logging.error("LLM extraction failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
+    data_store["clinicalReports"] = [p.model_dump() for p in clinical_reports]
+    return JSONResponse(content={"message": "clinicalReports saved successfully.", "data": data_store["clinicalReports"]})
+
+@app.get("/get/clinicalReports")
+async def get_clinical_reports():
+    logging.info("GET /get/clinicalReports called")
+    if "clinicalReports" not in data_store:
+        logging.warning("clinicalReports not found in data_store")
+        raise HTTPException(status_code=404, detail="clinicalReports not found")
+    return JSONResponse(content=data_store["clinicalReports"])
+
+@app.post("/post/doctorLetters")
+async def post_doctor_letters(files: list[UploadFile] = File(...)):
+    logging.info("POST /post/doctorLetters called with %d files", len(files))
+    # ----------------------------------------------------------
+    try:
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    try:
+        doctor_letters: list[DoctorLetter] = llm.image2struct(images, DoctorLetter, llm.doctor_letter_prompt, "DoctorLetters")
+        logging.info("Doctor letter extraction successful, %d records found", len(doctor_letters))
+    except Exception as e:
+        logging.error("LLM extraction failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
+    data_store["doctorLetters"] = [p.model_dump() for p in doctor_letters]
+    return JSONResponse(content={"message": "doctorLetters saved successfully.", "data": data_store["doctorLetters"]})
+
+@app.get("/get/doctorLetters")
+async def get_doctor_letters():
+    logging.info("GET /get/doctorLetters called")
+    if "doctorLetters" not in data_store:
+        logging.warning("doctorLetters not found in data_store")
+        raise HTTPException(status_code=404, detail="doctorLetters not found")
+    return JSONResponse(content=data_store["doctorLetters"])
