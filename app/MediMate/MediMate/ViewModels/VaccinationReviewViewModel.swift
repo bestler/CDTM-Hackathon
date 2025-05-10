@@ -60,6 +60,14 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
         guard vaccinations.indices.contains(index) else { return }
         vaccinations[index] = vaccination
     }
+    
+    func addVaccination(_ vaccination: Vaccination) {
+        vaccinations.append(vaccination)
+    }
+    
+    func removeVaccinations(at offsets: IndexSet) {
+        vaccinations.remove(atOffsets: offsets)
+    }
 
     func onNext(completion: @escaping (Bool) -> Void) {
         completion(isComplete)
