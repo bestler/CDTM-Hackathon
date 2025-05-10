@@ -401,7 +401,9 @@
 				DEVELOPMENT_TEAM = A653B885WN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "To read the Health data and show it to the user";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -431,7 +433,9 @@
 				DEVELOPMENT_TEAM = A653B885WN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "To read the Health data and show it to the user";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
