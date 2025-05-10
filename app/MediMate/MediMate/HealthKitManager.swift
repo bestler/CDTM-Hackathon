@@ -58,26 +58,56 @@ class HealthKitManager: ObservableObject {
 
     // All supported types as a static property
     static let supportedTypes: [HealthDataType] = [
+        // Activity
         QuantityHealthDataType(identifier: .stepCount, unit: .count(), isCumulative: true),
         QuantityHealthDataType(identifier: .distanceWalkingRunning, unit: .meter(), isCumulative: true),
         QuantityHealthDataType(identifier: .distanceCycling, unit: .meter(), isCumulative: true),
+        QuantityHealthDataType(identifier: .flightsClimbed, unit: .count(), isCumulative: true),
         QuantityHealthDataType(identifier: .activeEnergyBurned, unit: .kilocalorie(), isCumulative: true),
-        QuantityHealthDataType(identifier: .basalEnergyBurned, unit: .kilocalorie(), isCumulative: true),
-        QuantityHealthDataType(identifier: .dietaryEnergyConsumed, unit: .kilocalorie(), isCumulative: true),
-        QuantityHealthDataType(identifier: .heartRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
-        QuantityHealthDataType(identifier: .bodyMass, unit: .gramUnit(with: .kilo), isCumulative: false),
+        QuantityHealthDataType(identifier: .appleExerciseTime, unit: .minute(), isCumulative: true),
+        QuantityHealthDataType(identifier: .appleStandTime, unit: .minute(), isCumulative: true),
+
+        // Body Measurements
         QuantityHealthDataType(identifier: .height, unit: .meter(), isCumulative: false),
-        QuantityHealthDataType(identifier: .bodyFatPercentage, unit: .percent(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyMass, unit: .gramUnit(with: .kilo), isCumulative: false),
         QuantityHealthDataType(identifier: .bodyMassIndex, unit: .count(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyFatPercentage, unit: .percent(), isCumulative: false),
         QuantityHealthDataType(identifier: .leanBodyMass, unit: .gramUnit(with: .kilo), isCumulative: false),
+        QuantityHealthDataType(identifier: .waistCircumference, unit: .meter(), isCumulative: false),
+
+        // Heart
+        QuantityHealthDataType(identifier: .heartRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
         QuantityHealthDataType(identifier: .restingHeartRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
         QuantityHealthDataType(identifier: .walkingHeartRateAverage, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
         QuantityHealthDataType(identifier: .heartRateVariabilitySDNN, unit: .second(), isCumulative: false),
-        QuantityHealthDataType(identifier: .oxygenSaturation, unit: .percent(), isCumulative: false),
-        QuantityHealthDataType(identifier: .respiratoryRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+
+        // Vitals
         QuantityHealthDataType(identifier: .bloodPressureSystolic, unit: .millimeterOfMercury(), isCumulative: false),
         QuantityHealthDataType(identifier: .bloodPressureDiastolic, unit: .millimeterOfMercury(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyTemperature, unit: .degreeCelsius(), isCumulative: false),
+        QuantityHealthDataType(identifier: .oxygenSaturation, unit: .percent(), isCumulative: false),
         QuantityHealthDataType(identifier: .bloodGlucose, unit: HKUnit.gramUnit(with: .deci).unitDivided(by: .liter()), isCumulative: false),
+
+        // Respiratory
+        QuantityHealthDataType(identifier: .respiratoryRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+        QuantityHealthDataType(identifier: .peakExpiratoryFlowRate, unit: .liter().unitDivided(by: .minute()), isCumulative: false),
+
+        // Nutrition
+        QuantityHealthDataType(identifier: .dietaryEnergyConsumed, unit: .kilocalorie(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryCarbohydrates, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryProtein, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryFatTotal, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryFiber, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietarySugar, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietarySodium, unit: .gram(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryWater, unit: .liter(), isCumulative: true),
+
+        // OtherData (if available in HealthKit)
+        QuantityHealthDataType(identifier: .uvExposure, unit: .count(), isCumulative: false),
+        QuantityHealthDataType(identifier: .timeInDaylight, unit: .minute(), isCumulative: true),
+        //QuantityHealthDataType(identifier: .handwashingEventDuration, unit: .second(), isCumulative: true),
+
+        // ECG
         ECGHealthDataType()
     ]
 

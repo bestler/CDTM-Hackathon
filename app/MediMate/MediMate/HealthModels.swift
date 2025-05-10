@@ -176,40 +176,92 @@ import HealthKit
 
 extension HealthKitManager {
     func toAppleHealth() -> AppleHealth {
-        // This is a basic mapping. You should expand this to map all available HealthKit data.
+        // Helper to extract Double from allData
+        func extract(_ key: String) -> Double? {
+            allData[key]?.components(separatedBy: " ").first.flatMap { Double($0) }
+        }
+
         let activity = Activity(
-            stepCount: allData["HKQuantityTypeIdentifierStepCount"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            walkingDistance: allData["HKQuantityTypeIdentifierDistanceWalkingRunning"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            runningDistance: nil, // Add mapping if available
-            flightsClimbed: nil, // Add mapping if available
-            activeEnergyBurned: allData["HKQuantityTypeIdentifierActiveEnergyBurned"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            exerciseMinutes: nil, // Add mapping if available
-            standHours: nil // Add mapping if available
+            stepCount: extract("HKQuantityTypeIdentifierStepCount"),
+            walkingDistance: extract("HKQuantityTypeIdentifierDistanceWalkingRunning"),
+            runningDistance: extract("HKQuantityTypeIdentifierDistanceCycling"),
+            flightsClimbed: extract("HKQuantityTypeIdentifierFlightsClimbed"),
+            activeEnergyBurned: extract("HKQuantityTypeIdentifierActiveEnergyBurned"),
+            exerciseMinutes: extract("HKQuantityTypeIdentifierAppleExerciseTime"),
+            standHours: extract("HKQuantityTypeIdentifierAppleStandTime")
         )
+
         let bodyMeasurements = BodyMeasurements(
-            height: allData["HKQuantityTypeIdentifierHeight"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            weight: allData["HKQuantityTypeIdentifierBodyMass"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            bodyMassIndex: allData["HKQuantityTypeIdentifierBodyMassIndex"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            bodyFatPercentage: allData["HKQuantityTypeIdentifierBodyFatPercentage"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            leanBodyMass: allData["HKQuantityTypeIdentifierLeanBodyMass"].flatMap { Double($0.components(separatedBy: " ").first ?? "") },
-            waistCircumference: nil // Add mapping if available
+            height: extract("HKQuantityTypeIdentifierHeight"),
+            weight: extract("HKQuantityTypeIdentifierBodyMass"),
+            bodyMassIndex: extract("HKQuantityTypeIdentifierBodyMassIndex"),
+            bodyFatPercentage: extract("HKQuantityTypeIdentifierBodyFatPercentage"),
+            leanBodyMass: extract("HKQuantityTypeIdentifierLeanBodyMass"),
+            waistCircumference: extract("HKQuantityTypeIdentifierWaistCircumference")
         )
-        // Add more mappings as needed for your app
+
+        let heart = Heart(
+            heartRate: extract("HKQuantityTypeIdentifierHeartRate"),
+            restingHeartRate: extract("HKQuantityTypeIdentifierRestingHeartRate"),
+            walkingHeartRateAverage: extract("HKQuantityTypeIdentifierWalkingHeartRateAverage"),
+            heartRateVariability: extract("HKQuantityTypeIdentifierHeartRateVariabilitySDNN"),
+            electrocardiogram: nil // Could be filled with more advanced queries
+        )
+
+        let vitals = Vitals(
+            bloodPressure: {
+                let sys = extract("HKQuantityTypeIdentifierBloodPressureSystolic")
+                let dia = extract("HKQuantityTypeIdentifierBloodPressureDiastolic")
+                if sys != nil || dia != nil {
+                    return BloodPressure(systolic: sys, diastolic: dia)
+                } else {
+                    return nil
+                }
+            }(),
+            bodyTemperature: extract("HKQuantityTypeIdentifierBodyTemperature"),
+            bloodOxygenSaturation: extract("HKQuantityTypeIdentifierOxygenSaturation"),
+            bloodGlucose: nil // Needs custom parsing if available
+        )
+
+        let respiratory = Respiratory(
+            respiratoryRate: extract("HKQuantityTypeIdentifierRespiratoryRate"),
+            oxygenSaturation: extract("HKQuantityTypeIdentifierOxygenSaturation"),
+            peakExpiratoryFlowRate: extract("HKQuantityTypeIdentifierPeakExpiratoryFlowRate")
+        )
+
+        let nutrition = Nutrition(
+            calories: extract("HKQuantityTypeIdentifierDietaryEnergyConsumed"),
+            carbohydrates: extract("HKQuantityTypeIdentifierDietaryCarbohydrates"),
+            protein: extract("HKQuantityTypeIdentifierDietaryProtein"),
+            fat: extract("HKQuantityTypeIdentifierDietaryFatTotal"),
+            fiber: extract("HKQuantityTypeIdentifierDietaryFiber"),
+            sugar: extract("HKQuantityTypeIdentifierDietarySugar"),
+            sodium: extract("HKQuantityTypeIdentifierDietarySodium"),
+            water: extract("HKQuantityTypeIdentifierDietaryWater")
+        )
+
+        // OtherData
+        let otherData = OtherData(
+            handwashingDuration: extract("HKQuantityTypeIdentifierHandwashingEventDuration"),
+            timeInDaylight: extract("HKQuantityTypeIdentifierTimeInDaylight"),
+            uvExposure: extract("HKQuantityTypeIdentifierUVExposure")
+        )
+
         return AppleHealth(
             activity: activity,
             bodyMeasurements: bodyMeasurements,
             cycleTracking: nil,
             hearing: nil,
-            heart: nil,
+            heart: heart,
             medications: nil,
             mentalWellbeing: nil,
             mobility: nil,
-            nutrition: nil,
-            respiratory: nil,
+            nutrition: nutrition,
+            respiratory: respiratory,
             sleep: nil,
             symptoms: nil,
-            vitals: nil,
-            otherData: nil
+            vitals: vitals,
+            otherData: otherData
         )
     }
 }
