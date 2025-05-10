@@ -13,17 +13,33 @@ struct VaccinationReviewView: View {
             // ScanDocumentView is now a child of this view, using the scanViewModel from the reviewViewModel
             ScanDocumentView(viewModel: viewModel.scanViewModel)
 
-            // Upload button
-            Button(action: {
-                viewModel.uploadAndParseVaccinations()
-            }) {
-                HStack {
-                    Image(systemName: "arrow.up.doc")
-                    Text("Upload & Parse Vaccinations")
+            // Upload and Manual Entry Buttons
+            HStack(spacing: 16) {
+                Button(action: {
+                    viewModel.uploadAndParseVaccinations()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.up.doc")
+                        Text("Upload & Parse")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                //.disabled((viewModel.selectedImages.isEmpty && viewModel.selectedFileURLs.isEmpty) || viewModel.isUploading)
+                
+                Button(action: {
+                    showingVaccinationsModal = true
+                    viewModel.isManualEntry = true
+                }) {
+                    HStack {
+                        Image(systemName: "pencil")
+                        Text("Enter Manually")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
-            //.disabled((viewModel.selectedImages.isEmpty && viewModel.selectedFileURLs.isEmpty) || viewModel.isUploading)
+            .padding(.horizontal)
 
             if viewModel.isUploading {
                 ProgressView("Uploading...")

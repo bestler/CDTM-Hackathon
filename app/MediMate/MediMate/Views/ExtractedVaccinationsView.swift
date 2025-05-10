@@ -14,11 +14,37 @@ struct ExtractedVaccinationsView: View {
                 Color(.systemGray6).edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 16) {
-                    Text("These are the vaccinations recognized from your document. Please review and correct any information if needed.")
+                    Text(viewModel.isManualEntry ?
+                        "Enter your vaccination information manually below." :
+                        "These are the vaccinations recognized from your document. Please review and correct any information if needed.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
+                        
+                    if viewModel.isManualEntry && viewModel.vaccinations.isEmpty {
+                        // If manual entry mode and no vaccinations yet, automatically show the add form
+                        Button(action: {
+                            showingAddVaccinationSheet = true
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add First Vaccination")
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .padding(.horizontal)
+                        .onAppear {
+                            // Automatically open the add form when in manual entry mode
+                            if viewModel.vaccinations.isEmpty {
+                                showingAddVaccinationSheet = true
+                            }
+                        }
+                    }
 
                     // Form with vaccinations
                     Form {
@@ -90,9 +116,10 @@ struct ExtractedVaccinationsView: View {
                     .padding(.horizontal)
                 }
             }
-            .navigationTitle("Extracted Vaccinations")
+            .navigationTitle(viewModel.isManualEntry ? "Manual Vaccination Entry" : "Extracted Vaccinations")
             .navigationBarItems(
                 trailing: Button(action: {
+                    viewModel.isManualEntry = false
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Save")

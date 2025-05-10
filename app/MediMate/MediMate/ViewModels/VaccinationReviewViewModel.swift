@@ -8,6 +8,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     @Published var isUploading: Bool = false
     @Published var uploadError: String? = nil
     @Published var vaccinations: [Vaccination] = []
+    @Published var isManualEntry: Bool = false
 
     // ScanDocumentViewModel is now a child view model - declare after the basic properties
     @Published var scanViewModel: ScanDocumentViewModel

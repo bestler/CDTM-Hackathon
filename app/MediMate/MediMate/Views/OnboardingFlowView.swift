@@ -47,29 +47,27 @@ struct OnboardingFlowView: View {
                 .padding(.top)
             
             ScrollView {
-                // Placeholder for Avatar
-                if flowViewModel.currentStep is HealthKitStepViewModel {
-                    VStack {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                                .foregroundColor(.gray)
-                                .frame(height: 150)
-                                .padding()
-                            
-                            Image(systemName: "person")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(.gray)
-                        }
+                // Placeholder for Avatar - now shown on all screens
+                VStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                            .foregroundColor(.gray)
+                            .frame(height: 150)
+                            .padding()
                         
-                        Text("Placeholder for Avatar")
-                            .font(.subheadline)
+                        Image(systemName: "person")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
                             .foregroundColor(.gray)
                     }
-                    .padding()
+                    
+                    Text("Placeholder for Avatar")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                 }
+                .padding()
                 
                 // Step content
                 Group {
