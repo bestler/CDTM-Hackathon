@@ -31,7 +31,7 @@ def process_images_with_mistral(image_paths):
         return
 
     # Step 2: Set up Mistral API
-    api_key = "cr0jsksN6GrXg0spar0vMPENfHVNza6v"  # Replace with your actual API key
+    api_key = "cr0jsksN6GrXg0spar0vMPENfHVNza6v"
     model = "mistral-small-latest"
 
     if not api_key:
