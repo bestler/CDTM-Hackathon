@@ -133,14 +133,17 @@ struct ContentView: View {
                             // Preview for image or PDF
                             if (inputType == .camera || inputType == .photoLibrary), !cameraManager.selectedImages.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
+                                    HStack(alignment: .top, spacing: 12) {
                                         ForEach(Array(cameraManager.selectedImages.enumerated()), id: \ .offset) { idx, image in
                                             ZStack(alignment: .topTrailing) {
-                                                Image(uiImage: image)
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 120, height: 120)
-                                                    .cornerRadius(8)
+                                                VStack(spacing: 0) {
+                                                    Spacer(minLength: 12)
+                                                    Image(uiImage: image)
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 120, height: 120)
+                                                        .cornerRadius(8)
+                                                }
                                                 Button(action: {
                                                     cameraManager.selectedImages.remove(at: idx)
                                                 }) {
@@ -149,20 +152,27 @@ struct ContentView: View {
                                                         .background(Color.white.opacity(0.7))
                                                         .clipShape(Circle())
                                                 }
-                                                .offset(x: 6, y: -6)
+                                                .padding(4)
                                             }
                                         }
                                     }
                                 }
-                                .frame(height: 130)
+                                .frame(height: 140)
                             } else if inputType == .files, !cameraManager.selectedFileURLs.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
+                                    HStack(alignment: .top, spacing: 12) {
                                         ForEach(Array(cameraManager.selectedFileURLs.enumerated()), id: \ .offset) { idx, fileURL in
                                             ZStack(alignment: .topTrailing) {
-                                                PDFPreview(url: fileURL)
-                                                    .frame(width: 120, height: 120)
-                                                    .cornerRadius(8)
+                                                VStack(spacing: 0) {
+                                                    Spacer(minLength: 12)
+                                                    PDFPreview(url: fileURL)
+                                                        .frame(width: 120, height: 120)
+                                                        .cornerRadius(8)
+                                                    Text(fileURL.lastPathComponent)
+                                                        .font(.caption2)
+                                                        .lineLimit(1)
+                                                        .frame(maxWidth: 100)
+                                                }
                                                 Button(action: {
                                                     cameraManager.selectedFileURLs.remove(at: idx)
                                                 }) {
@@ -171,19 +181,12 @@ struct ContentView: View {
                                                         .background(Color.white.opacity(0.7))
                                                         .clipShape(Circle())
                                                 }
-                                                .offset(x: 6, y: -6)
-                                                VStack {
-                                                    Spacer()
-                                                    Text(fileURL.lastPathComponent)
-                                                        .font(.caption2)
-                                                        .lineLimit(1)
-                                                        .frame(maxWidth: 100)
-                                                }
+                                                .padding(4)
                                             }
                                         }
                                     }
                                 }
-                                .frame(height: 130)
+                                .frame(height: 140)
                             }
 
                             // Unified upload button
