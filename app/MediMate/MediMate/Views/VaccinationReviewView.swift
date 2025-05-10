@@ -6,38 +6,55 @@ struct VaccinationReviewView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Text("Vaccination Documents")
-                .font(.title2)
-                .padding(.top)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Vaccination Documents")
+                    .font(.title2)
+                    .padding(.top)
+
+                Text("Upload your vaccination documents by scanning with the camera, selecting from your photos, or choosing PDF files. Or you can manually enter your vaccination information.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
+            }
+            .padding(.horizontal)
 
             // ScanDocumentView is now a child of this view, using the scanViewModel from the reviewViewModel
             ScanDocumentView(viewModel: viewModel.scanViewModel)
 
-            // Upload and Manual Entry Buttons
-            HStack(spacing: 16) {
-                Button(action: {
-                    viewModel.uploadAndParseVaccinations()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.up.doc")
-                        Text("Upload & Parse")
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                //.disabled((viewModel.selectedImages.isEmpty && viewModel.selectedFileURLs.isEmpty) || viewModel.isUploading)
+            // Divider with "OR" text
+            HStack {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 1)
                 
-                Button(action: {
-                    showingVaccinationsModal = true
-                    viewModel.isManualEntry = true
-                }) {
-                    HStack {
-                        Image(systemName: "pencil")
-                        Text("Enter Manually")
-                    }
-                    .frame(maxWidth: .infinity)
+                Text("OR")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 10)
+                
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 1)
+            }
+            .padding(.horizontal)
+
+            // Combined button for manual entry/edit based on whether vaccinations exist
+            Button(action: {
+                showingVaccinationsModal = true
+                // Only set manual entry true if there are no vaccinations yet
+                viewModel.isManualEntry = viewModel.vaccinations.isEmpty
+            }) {
+                HStack {
+                    Image(systemName: viewModel.vaccinations.isEmpty ? "pencil" : "list.bullet.clipboard")
+                    Text(viewModel.vaccinations.isEmpty ?
+                         "Enter Vaccinations Manually" :
+                            "Edit Vaccinations (\(viewModel.vaccinations.count))")
                 }
-                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(viewModel.vaccinations.isEmpty ? Color.secondary : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
             .padding(.horizontal)
 
@@ -49,30 +66,21 @@ struct VaccinationReviewView: View {
                     .foregroundColor(.red)
             }
 
-            // Show a button but also trigger modal automatically when vaccinations are available
-            if !viewModel.vaccinations.isEmpty {
-                Button(action: {
-                    showingVaccinationsModal = true
-                }) {
-                    HStack {
-                        Image(systemName: "list.bullet.clipboard")
-                        Text("View Extracted Vaccinations (\(viewModel.vaccinations.count))")
+            // Empty VStack just to observe changes in vaccinations
+            VStack {}
+                .onChange(of: viewModel.vaccinations) { _, newVaccinations in
+                    if !newVaccinations.isEmpty && !viewModel.isManualEntry {
+                        showingVaccinationsModal = true
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .padding(.horizontal)
                 .onAppear {
-                    showingVaccinationsModal = true
+                    if !viewModel.vaccinations.isEmpty && !viewModel.isManualEntry {
+                        showingVaccinationsModal = true
+                    }
                 }
-            }
-
-            }
+        }
         .sheet(isPresented: $showingVaccinationsModal) {
             ExtractedVaccinationsView(viewModel: viewModel)
         }
+        }
     }
-}

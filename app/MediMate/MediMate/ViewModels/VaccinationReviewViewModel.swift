@@ -30,6 +30,16 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     // Custom initializer
     init(scanViewModel: ScanDocumentViewModel = ScanDocumentViewModel()) {
         self.scanViewModel = scanViewModel
+        
+        // Set up callback for when images or files are added to automatically upload
+        self.scanViewModel.onImagesOrFilesAdded = { [weak self] in
+            guard let self = self else { return }
+            // Only upload if we have images/files and not currently uploading
+            if !self.isUploading && 
+               (!self.scanViewModel.selectedImages.isEmpty || !self.scanViewModel.selectedFileURLs.isEmpty) {
+                self.uploadAndParseVaccinations()
+            }
+        }
     }
 
     // Upload and parse vaccinations from API

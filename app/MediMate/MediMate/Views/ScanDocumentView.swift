@@ -11,6 +11,7 @@ struct ScanDocumentView: View {
         VStack(spacing: 20) {
 
             VStack(spacing: 12) {
+                // Full width camera button
                 Button(action: { showCamera = true }) {
                     HStack {
                         Image(systemName: "camera")
@@ -19,24 +20,29 @@ struct ScanDocumentView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-
-                Button(action: { showPhotoLibrary = true }) {
-                    HStack {
-                        Image(systemName: "photo.on.rectangle")
-                        Text("Photo Library")
+                
+                // Side-by-side buttons for Photo Library and Files
+                HStack(spacing: 8) {
+                    // Photo Library Button (50% width)
+                    Button(action: { showPhotoLibrary = true }) {
+                        HStack {
+                            Image(systemName: "photo.on.rectangle")
+                            Text("Photo Library")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button(action: { showDocumentPicker = true }) {
-                    HStack {
-                        Image(systemName: "doc")
-                        Text("Files (PDF)")
+                    .buttonStyle(.bordered)
+                    
+                    // Files Button (50% width)
+                    Button(action: { showDocumentPicker = true }) {
+                        HStack {
+                            Image(systemName: "doc")
+                            Text("Files (PDF)")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             }
 
             // Preview
