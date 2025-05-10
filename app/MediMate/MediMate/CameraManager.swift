@@ -7,7 +7,7 @@ import PhotosUI
 
 class CameraManager: ObservableObject {
     @Published var selectedImages: [UIImage] = []
-    @Published var selectedFileURL: URL? = nil
+    @Published var selectedFileURLs: [URL] = []
     @Published var isShowingImagePicker = false
     @Published var isShowingPhotoPicker = false
     @Published var isShowingDocumentPicker = false
@@ -94,12 +94,13 @@ struct PhotoLibraryPicker: UIViewControllerRepresentable {
 }
 
 struct DocumentPicker: UIViewControllerRepresentable {
-    @Binding var fileURL: URL?
+    @Binding var fileURLs: [URL]
     @Environment(\.presentationMode) private var presentationMode
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf], asCopy: true)
         picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = true
         return picker
     }
 
@@ -115,7 +116,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
             self.parent = parent
         }
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            parent.fileURL = urls.first
+            parent.fileURLs.append(contentsOf: urls)
             parent.presentationMode.wrappedValue.dismiss()
         }
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {

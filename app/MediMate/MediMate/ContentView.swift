@@ -155,15 +155,39 @@ struct ContentView: View {
                                     }
                                 }
                                 .frame(height: 130)
-                            } else if inputType == .files, let fileURL = cameraManager.selectedFileURL {
-                                PDFPreview(url: fileURL)
-                                    .frame(height: 200)
-                                    .cornerRadius(8)
-                                Text("Selected file: \(fileURL.lastPathComponent)")
+                            } else if inputType == .files, !cameraManager.selectedFileURLs.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(Array(cameraManager.selectedFileURLs.enumerated()), id: \ .offset) { idx, fileURL in
+                                            ZStack(alignment: .topTrailing) {
+                                                PDFPreview(url: fileURL)
+                                                    .frame(width: 120, height: 120)
+                                                    .cornerRadius(8)
+                                                Button(action: {
+                                                    cameraManager.selectedFileURLs.remove(at: idx)
+                                                }) {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .foregroundColor(.red)
+                                                        .background(Color.white.opacity(0.7))
+                                                        .clipShape(Circle())
+                                                }
+                                                .offset(x: 6, y: -6)
+                                                VStack {
+                                                    Spacer()
+                                                    Text(fileURL.lastPathComponent)
+                                                        .font(.caption2)
+                                                        .lineLimit(1)
+                                                        .frame(maxWidth: 100)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .frame(height: 130)
                             }
 
                             // Unified upload button
-                            if (!cameraManager.selectedImages.isEmpty || cameraManager.selectedFileURL != nil) {
+                            if (!cameraManager.selectedImages.isEmpty || !cameraManager.selectedFileURLs.isEmpty) {
                                 if isUploading {
                                     ProgressView("Uploading...")
                                 } else {
@@ -182,8 +206,8 @@ struct ContentView: View {
                                                     }
                                                 }
                                             }
-                                        } else if let fileURL = cameraManager.selectedFileURL {
-                                            APIService.shared.uploadPDF(url: fileURL) { result in
+                                        } else if !cameraManager.selectedFileURLs.isEmpty {
+                                            APIService.shared.uploadPDFs(urls: cameraManager.selectedFileURLs) { result in
                                                 DispatchQueue.main.async {
                                                     isUploading = false
                                                     switch result {
@@ -219,12 +243,12 @@ struct ContentView: View {
                                 }
                                 Button(action: {
                                     cameraManager.selectedImages = []
-                                    cameraManager.selectedFileURL = nil
+                                    cameraManager.selectedFileURLs = []
                                     uploadResult = nil
                                 }) {
                                     Label("Clear Selection", systemImage: "trash")
                                 }
-                                .disabled(cameraManager.selectedImages.isEmpty && cameraManager.selectedFileURL == nil)
+                                .disabled(cameraManager.selectedImages.isEmpty && cameraManager.selectedFileURLs.isEmpty)
                             }
                         }
 // MARK: - Unified Document Upload API
@@ -245,7 +269,7 @@ struct ContentView: View {
             PhotoLibraryPicker(images: $cameraManager.selectedImages)
         }
         .sheet(isPresented: $cameraManager.isShowingDocumentPicker) {
-            DocumentPicker(fileURL: $cameraManager.selectedFileURL)
+            DocumentPicker(fileURLs: $cameraManager.selectedFileURLs)
         }
     }
 }

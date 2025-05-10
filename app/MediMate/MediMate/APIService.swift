@@ -8,12 +8,19 @@ import HealthKit
 
 class APIService {
 
-    /// Unified document upload for image or PDF. If both are provided, image is preferred.
-    func uploadDocument(image: UIImage?, fileURL: URL?, completion: @escaping (Result<String, Error>) -> Void) {
-        if let image = image {
-            self.uploadImages([image], completion: completion)
-        } else if let fileURL = fileURL {
-            self.uploadPDF(url: fileURL, completion: completion)
+    /// Unified document upload for images and PDFs. If both are provided, uploads both.
+    func uploadDocument(images: [UIImage], fileURLs: [URL], completion: @escaping (Result<String, Error>) -> Void) {
+        if !images.isEmpty {
+            self.uploadImages(images) { result in
+                if !fileURLs.isEmpty {
+                    // If both images and PDFs, upload PDFs after images
+                    self.uploadPDFs(urls: fileURLs, completion: completion)
+                } else {
+                    completion(result)
+                }
+            }
+        } else if !fileURLs.isEmpty {
+            self.uploadPDFs(urls: fileURLs, completion: completion)
         } else {
             completion(.failure(NSError(domain: "No file selected", code: 0)))
         }
@@ -101,8 +108,8 @@ class APIService {
         task.resume()
     }
 
-    func uploadPDF(url: URL, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let apiURL = URL(string: "https://your-api-endpoint.com/upload") else {
+    func uploadPDFs(urls: [URL], completion: @escaping (Result<String, Error>) -> Void) {
+        guard let apiURL = URL(string: "http://172.20.10.4:8000/post/vaccinations") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }
@@ -111,17 +118,16 @@ class APIService {
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        guard let pdfData = try? Data(contentsOf: url) else {
-            completion(.failure(NSError(domain: "PDF Read Error", code: 0)))
-            return
-        }
-
         var body = Data()
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"document.pdf\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: application/pdf\r\n\r\n".data(using: .utf8)!)
-        body.append(pdfData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        for (idx, url) in urls.enumerated() {
+            guard let pdfData = try? Data(contentsOf: url) else { continue }
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"files\"; filename=\"document\(idx+1).pdf\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/pdf\r\n\r\n".data(using: .utf8)!)
+            body.append(pdfData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
