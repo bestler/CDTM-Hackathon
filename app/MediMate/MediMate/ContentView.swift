@@ -37,6 +37,11 @@ class ContentViewModel: ObservableObject {
 }
 
 
+enum InputType: String, CaseIterable, Identifiable {
+    case camera, photoLibrary, files
+    var id: String { self.rawValue }
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
@@ -45,6 +50,7 @@ struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var isUploading = false
     @State private var uploadResult: String? = nil
+    @State private var inputType: InputType = .camera
 
     var body: some View {
         NavigationSplitView {
@@ -95,8 +101,15 @@ struct ContentView: View {
                 }
             }
 
-            Section(header: Text("Scan Medical Document")) {
+            Section(header: Text("Scan or Upload Medical Document")) {
                 VStack(spacing: 12) {
+                    Picker("Select Input Type", selection: $inputType) {
+                        Text("Scan with Camera").tag(InputType.camera)
+                        Text("Photo Library").tag(InputType.photoLibrary)
+                        Text("Files").tag(InputType.files)
+                    }
+                    .pickerStyle(.segmented)
+
                     if let image = cameraManager.selectedImage {
                         Image(uiImage: image)
                             .resizable()
@@ -106,7 +119,7 @@ struct ContentView: View {
                         if isUploading {
                             ProgressView("Uploading...")
                         } else {
-                            Button("Send to API") {
+                            Button("Send Image to API") {
                                 isUploading = true
                                 uploadResult = nil
                                 APIService.shared.uploadImage(image) { result in
@@ -127,11 +140,45 @@ struct ContentView: View {
                                 .font(.caption)
                                 .foregroundColor(uploadResult.contains("successful") ? .green : .red)
                         }
+                    } else if let fileURL = cameraManager.selectedFileURL {
+                        Text("Selected file: \(fileURL.lastPathComponent)")
+                        if isUploading {
+                            ProgressView("Uploading...")
+                        } else {
+                            Button("Send File to API") {
+                                // TODO: Implement file upload logic here
+                                isUploading = false
+                                uploadResult = "File upload not yet implemented."
+                            }
+                        }
+                        if let uploadResult = uploadResult {
+                            Text(uploadResult)
+                                .font(.caption)
+                                .foregroundColor(uploadResult.contains("successful") ? .green : .red)
+                        }
                     }
-                    Button(action: {
-                        cameraManager.isShowingImagePicker = true
-                    }) {
-                        Label("Scan Document", systemImage: "camera")
+
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            switch inputType {
+                            case .camera:
+                                cameraManager.isShowingImagePicker = true
+                            case .photoLibrary:
+                                cameraManager.isShowingPhotoPicker = true
+                            case .files:
+                                cameraManager.isShowingDocumentPicker = true
+                            }
+                        }) {
+                            Label("Select Document", systemImage: "plus")
+                        }
+                        Button(action: {
+                            cameraManager.selectedImage = nil
+                            cameraManager.selectedFileURL = nil
+                            uploadResult = nil
+                        }) {
+                            Label("Clear Selection", systemImage: "trash")
+                        }
+                        .disabled(cameraManager.selectedImage == nil && cameraManager.selectedFileURL == nil)
                     }
                 }
             }
@@ -144,6 +191,12 @@ struct ContentView: View {
                 ImagePicker(image: $cameraManager.selectedImage)
                     .edgesIgnoringSafeArea(.all)
             }
+        }
+        .sheet(isPresented: $cameraManager.isShowingPhotoPicker) {
+            PhotoLibraryPicker(image: $cameraManager.selectedImage)
+        }
+        .sheet(isPresented: $cameraManager.isShowingDocumentPicker) {
+            DocumentPicker(fileURL: $cameraManager.selectedFileURL)
         }
     }
 
