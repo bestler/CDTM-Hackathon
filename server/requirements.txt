@@ -1,0 +1,6 @@
+pymupdf==1.22.5
+Pillow==11.2.1
+fastapi
+uvicorn[standard]==0.22.0
+mistralai
+python-multipart

@@ -11,6 +11,8 @@ from livekit.agents import (
     metrics,
     RoomInputOptions,
 )
+from livekit.agents.llm import function_tool
+
 from livekit.plugins import (
     noise_cancellation,
     google,
@@ -59,6 +61,7 @@ class Assistant(Agent):
         )
         print(f"\n{Fore.GREEN}AI Assistant: {Style.BRIGHT}Hey, how can I help you today?{Style.RESET_ALL}")
 
+    @function_tool
     async def on_speech_to_text(self, transcript):
         print(f"\n{Fore.BLUE}User: {Style.BRIGHT}{transcript.text}{Style.RESET_ALL}")
         self.conversation_history.append({"role": "user", "content": transcript.text})

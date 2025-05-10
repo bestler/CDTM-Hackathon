@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from models import (
     GeneralInformation,
     AppleHealth,
@@ -9,6 +10,7 @@ from models import (
     BloodPanel,
     ClinicalReport,
     DoctorLetter,
+    Medication
 )
 import logging
 # ------------------------------------------------------
@@ -16,16 +18,41 @@ import llm
 import utils
 # ------------------------------------------------------
 app = FastAPI()
-
+origins = [
+    "http://localhost:8080",
+    "https://dashboard-1056955526781.europe-west3.run.app"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ------------------------------------------------------
 data_store = {}
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @app.post("/post/generalInformation")
-async def post_general_information(payload: GeneralInformation):
-    logging.info("POST /post/generalInformation called with payload: %s", payload.model_dump())
-    data_store["generalInformation"] = payload.model_dump()
-    return JSONResponse(content={"message": "generalInformation saved successfully."})
+async def post_general_information(files: list[UploadFile] = File(...)):
+    logging.info("POST /post/generalInformation called with %d files", len(files))
+    # ----------------------------------------------------------
+    try:
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    try:
+        general_info: list[GeneralInformation] = llm.image2struct(images, GeneralInformation, llm.general_info_prompt, "GeneralInformation")
+        logging.info("General information extraction successful")
+    except Exception as e:
+        logging.error("LLM extraction failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
+    data_store["generalInformation"] = general_info[0].model_dump()
+    return JSONResponse(content={"message": "generalInformation saved successfully.", "data": data_store["generalInformation"]})
 
 @app.get("/get/generalInformation")
 async def get_general_information():
@@ -192,3 +219,67 @@ async def get_doctor_letters():
         logging.warning("doctorLetters not found in data_store")
         raise HTTPException(status_code=404, detail="doctorLetters not found")
     return JSONResponse(content=data_store["doctorLetters"])
+
+@app.post("/post/medications")
+async def post_medications(files: list[UploadFile] = File(...)):
+    logging.info("POST /post/medications called with %d files", len(files))
+    # ----------------------------------------------------------
+    try:
+        images = await utils.files_to_base64(files)
+    except RuntimeError as e:
+        logging.error("Error converting files to base64: %s", e)
+        raise HTTPException(status_code=400, detail=f"Error converting files to base64: {e}")
+    # ----------------------------------------------------------
+    try:
+        medications = llm.image2struct(images, Medication, llm.medication_prompt, "Medications")
+        logging.info("Medication extraction successful, %d records found", len(medications))
+    except Exception as e:
+        logging.error("LLM extraction failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"LLM extraction failed: {e}")
+    # ----------------------------------------------------------
+    data_store["medications"] = [m.model_dump() for m in medications]
+    return JSONResponse(content={"message": "medications saved successfully.", "data": data_store["medications"]})
+
+@app.get("/get/medications")
+async def get_medications():
+    logging.info("GET /get/medications called")
+    if "medications" not in data_store:
+        logging.warning("medications not found in data_store")
+        raise HTTPException(status_code=404, detail="medications not found")
+    return JSONResponse(content=data_store["medications"])
+
+@app.post("/post/json/generalInformation")
+async def post_general_information(payload: GeneralInformation):
+    logging.info("POST /post/json/generalInformation called with payload: %s", payload.model_dump())
+    data_store["generalInformation"] = payload.model_dump()
+    return JSONResponse(content={"message": "generalInformation saved successfully.", "data": data_store["generalInformation"]})
+
+@app.post("/post/json/vaccinations")
+async def post_vaccinations_json(payload: list[Vaccination]):
+    logging.info("POST /post/json/vaccinations called with payload: %s", [v.model_dump() for v in payload])
+    data_store["vaccinations"] = [v.model_dump() for v in payload]
+    return JSONResponse(content={"message": "vaccinations saved successfully.", "data": data_store["vaccinations"]})
+
+@app.post("/post/json/bloodPanels")
+async def post_blood_panels_json(payload: list[BloodPanel]):
+    logging.info("POST /post/json/bloodPanels called with payload: %s", [p.model_dump() for p in payload])
+    data_store["bloodPanels"] = [p.model_dump() for p in payload]
+    return JSONResponse(content={"message": "bloodPanels saved successfully.", "data": data_store["bloodPanels"]})
+
+@app.post("/post/json/clinicalReports")
+async def post_clinical_reports_json(payload: list[ClinicalReport]):
+    logging.info("POST /post/json/clinicalReports called with payload: %s", [p.model_dump() for p in payload])
+    data_store["clinicalReports"] = [p.model_dump() for p in payload]
+    return JSONResponse(content={"message": "clinicalReports saved successfully.", "data": data_store["clinicalReports"]})
+
+@app.post("/post/json/doctorLetters")
+async def post_doctor_letters_json(payload: list[DoctorLetter]):
+    logging.info("POST /post/json/doctorLetters called with payload: %s", [p.model_dump() for p in payload])
+    data_store["doctorLetters"] = [p.model_dump() for p in payload]
+    return JSONResponse(content={"message": "doctorLetters saved successfully.", "data": data_store["doctorLetters"]})
+
+@app.post("/post/json/medications")
+async def post_medications_json(payload: list[Medication]):
+    logging.info("POST /post/json/medications called with payload: %s", [m.model_dump() for m in payload])
+    data_store["medications"] = [m.model_dump() for m in payload]
+    return JSONResponse(content={"message": "medications saved successfully.", "data": data_store["medications"]})
