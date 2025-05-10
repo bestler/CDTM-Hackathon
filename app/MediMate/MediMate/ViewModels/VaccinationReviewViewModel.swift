@@ -56,6 +56,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
                     if let data = responseString.data(using: .utf8),
                        let vaccinationsResponse = try? JSONDecoder().decode(VaccinationResponse.self, from: data) {
                         self?.vaccinations = vaccinationsResponse.data
+                        // Auto-show modal flag could be set here if needed
                     } else {
                         self?.uploadError = "Failed to parse vaccinations."
                     }
