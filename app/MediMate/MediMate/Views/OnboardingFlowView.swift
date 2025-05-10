@@ -77,6 +77,8 @@ struct OnboardingFlowView: View {
                         ScanDocumentView(viewModel: scanDocVM)
                     } else if let reviewVM = flowViewModel.currentStep as? VaccinationReviewViewModel {
                         VaccinationReviewView(viewModel: reviewVM)
+                    } else if let conversationVM = flowViewModel.currentStep as? ConversationViewModel {
+                        ConversationView(viewModel: conversationVM)
                     } else {
                         Text("Unknown step")
                     }

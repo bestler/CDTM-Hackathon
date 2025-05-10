@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 
 protocol FlowStepViewModel: ObservableObject {
+    var isStaticVideo: Bool { get }
     var title: String { get }
     var isComplete: Bool { get }
     func onNext(completion: @escaping (Bool) -> Void)
@@ -18,9 +19,9 @@ class OnboardingFlowViewModel: ObservableObject {
     init() {
         // Initialize steps
         let healthKitVM = HealthKitStepViewModel()
-        let scanDocumentVM = ScanDocumentViewModel()
-        let reviewVM = VaccinationReviewViewModel()
-        self.steps = [healthKitVM, reviewVM]
+        let vaccination = VaccinationReviewViewModel()
+        let conversationVM = ConversationViewModel()
+        self.steps = [healthKitVM, vaccination, conversationVM]
     }
 
     var currentStep: any FlowStepViewModel {

@@ -28,11 +28,8 @@ struct MediMateApp: App {
     var body: some Scene {
         WindowGroup {
             // Switch between onboarding and old ContentView for testing
-            //OnboardingFlowView()
+            OnboardingFlowView()
             // ContentView() // Uncomment to use the old ContentView
-            AvatarView()
-            //RoomScope(roomOptions: RoomOptions(defaultAudioCaptureOptions: Audi)) {
-               // VideoConferenceView()
             //}
         }
         .modelContainer(sharedModelContainer)

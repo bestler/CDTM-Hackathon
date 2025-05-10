@@ -21,7 +21,8 @@ class ScanDocumentViewModel: ObservableObject, FlowStepViewModel {
     }
     var title: String { "Scan Documents" }
     var isComplete: Bool { !(selectedImages.isEmpty && selectedFileURLs.isEmpty) }
-    
+    var isStaticVideo: Bool { true }
+
     // Callback for when images or files are added
     var onImagesOrFilesAdded: (() -> Void)?
 

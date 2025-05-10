@@ -10,6 +10,7 @@ class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
     let healthKitManager = HealthKitManager()
     var title: String { "Import Health Data" }
     var isComplete: Bool { true } // Always allow skipping
+    var isStaticVideo: Bool { true }
 
     func requestHealthKit() {
         healthKitManager.requestAuthorization { [weak self] success in

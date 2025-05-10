@@ -24,8 +24,9 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
         set { scanViewModel.selectedFileURLs = newValue }
     }
 
-    var title: String { "Review Vaccination" }
-    var isComplete: Bool { !vaccinations.isEmpty }
+    var title: String { "Vaccination" }
+    var isComplete: Bool { true }
+    var isStaticVideo: Bool { true }
 
     // Custom initializer
     init(scanViewModel: ScanDocumentViewModel = ScanDocumentViewModel()) {
