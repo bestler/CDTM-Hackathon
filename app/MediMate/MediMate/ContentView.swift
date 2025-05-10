@@ -17,6 +17,9 @@ import PDFKit
 import UIKit
 import PhotosUI
 
+// Import the AppleHealth models
+//import HealthModels
+
 @MainActor
 class ContentViewModel: ObservableObject {
     @Published var isAuthorized = false
@@ -38,6 +41,14 @@ class ContentViewModel: ObservableObject {
         healthKitManager.fetchAllData()
         self.allData = healthKitManager.allData
     }
+
+    // Post Apple Health data to server
+    func postAppleHealthData(completion: @escaping (Result<String, Error>) -> Void) {
+        print("Uploading data to server...")
+        let appleHealth = healthKitManager.toAppleHealth()
+        print(appleHealth)
+        APIService.shared.uploadHealthData(appleHealth, completion: completion)
+    }
 }
 
 
@@ -48,6 +59,9 @@ struct ContentView: View {
     @State private var isUploading = false
     @State private var uploadResult: String? = nil
     @State private var inputType: InputType = .camera
+
+    @State private var healthUploadResult: String? = nil
+    @State private var isUploadingHealth = false
 
     var body: some View {
         NavigationView {
@@ -72,6 +86,31 @@ struct ContentView: View {
                                 }
                                 Button("Refresh Data") {
                                     viewModel.fetchAllData()
+                                }
+                                Divider()
+                                if isUploadingHealth {
+                                    ProgressView("Uploading Health Data...")
+                                } else {
+                                    Button("Send Health Data to API") {
+                                        isUploadingHealth = true
+                                        healthUploadResult = nil
+                                        viewModel.postAppleHealthData { result in
+                                            DispatchQueue.main.async {
+                                                isUploadingHealth = false
+                                                switch result {
+                                                case .success(let msg):
+                                                    healthUploadResult = "Upload successful: \(msg)"
+                                                case .failure(let error):
+                                                    healthUploadResult = "Upload failed: \(error.localizedDescription)"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if let healthUploadResult = healthUploadResult {
+                                    Text(healthUploadResult)
+                                        .font(.caption)
+                                        .foregroundColor(healthUploadResult.contains("successful") ? .green : .red)
                                 }
                             }
                         } else {

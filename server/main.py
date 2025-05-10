@@ -48,6 +48,7 @@ async def get_general_information():
 @app.post("/post/appleHealth")
 async def post_apple_health(payload: AppleHealth):
     data_store["appleHealth"] = payload.model_dump()
+    print("appleHealth data:", data_store["appleHealth"])
     return {"message": "appleHealth data saved successfully."}
 
 @app.get("/get/appleHealth")

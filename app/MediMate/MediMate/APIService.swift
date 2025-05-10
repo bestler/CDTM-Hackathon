@@ -3,10 +3,59 @@
 
 import Foundation
 import UIKit
+import HealthKit
+//import HealthModels
 
 class APIService {
     static let shared = APIService()
     private init() {}
+
+    // Upload Apple Health data as JSON
+    func uploadHealthData(_ healthData: AppleHealth, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let url = URL(string: "http://172.20.10.4:8000/post/appleHealth") else {
+            print("[APIService] Invalid URL")
+            completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            let jsonData = try JSONEncoder().encode(healthData)
+            request.httpBody = jsonData
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[APIService] JSON Body: \(jsonString)")
+            }
+        } catch {
+            print("[APIService] JSON encoding error: \(error)")
+            completion(.failure(error))
+            return
+        }
+
+        print("[APIService] Sending request to: \(url)")
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("[APIService] Network error: \(error)")
+                completion(.failure(error))
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse {
+                print("[APIService] Response status code: \(httpResponse.statusCode)")
+            } else {
+                print("[APIService] No HTTPURLResponse received")
+            }
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("[APIService] Response body: \(responseString)")
+            }
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                completion(.failure(NSError(domain: "Server error", code: 0)))
+                return
+            }
+            completion(.success("Success"))
+        }
+        task.resume()
+    }
 
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: "https://your-api-endpoint.com/upload") else {
