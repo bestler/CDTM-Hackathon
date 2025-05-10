@@ -6,7 +6,7 @@ import SwiftUI
 import PhotosUI
 
 class CameraManager: ObservableObject {
-    @Published var selectedImage: UIImage? = nil
+    @Published var selectedImages: [UIImage] = []
     @Published var selectedFileURL: URL? = nil
     @Published var isShowingImagePicker = false
     @Published var isShowingPhotoPicker = false
@@ -14,7 +14,7 @@ class CameraManager: ObservableObject {
 }
 
 struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
+    @Binding var images: [UIImage]
     @Environment(\.presentationMode) private var presentationMode
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
@@ -37,7 +37,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let uiImage = info[.originalImage] as? UIImage {
-                parent.image = uiImage
+                parent.images.append(uiImage)
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -47,36 +47,48 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
 }
 
+import PhotosUI
+
 struct PhotoLibraryPicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
+    @Binding var images: [UIImage]
     @Environment(\.presentationMode) private var presentationMode
 
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 0 // 0 = unlimited selection
+        config.filter = .images
+        let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
-    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
         let parent: PhotoLibraryPicker
         init(_ parent: PhotoLibraryPicker) {
             self.parent = parent
         }
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let uiImage = info[.originalImage] as? UIImage {
-                parent.image = uiImage
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            let group = DispatchGroup()
+            for result in results {
+                group.enter()
+                result.itemProvider.loadObject(ofClass: UIImage.self) { reading, error in
+                    defer { group.leave() }
+                    if let image = reading as? UIImage {
+                        DispatchQueue.main.async {
+                            self.parent.images.append(image)
+                        }
+                    }
+                }
             }
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
+            group.notify(queue: .main) {
+                self.parent.presentationMode.wrappedValue.dismiss()
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ class APIService {
     /// Unified document upload for image or PDF. If both are provided, image is preferred.
     func uploadDocument(image: UIImage?, fileURL: URL?, completion: @escaping (Result<String, Error>) -> Void) {
         if let image = image {
-            self.uploadImage(image, completion: completion)
+            self.uploadImages([image], completion: completion)
         } else if let fileURL = fileURL {
             self.uploadPDF(url: fileURL, completion: completion)
         } else {
@@ -68,7 +68,8 @@ class APIService {
         task.resume()
     }
 
-    func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
+
+    func uploadImages(_ images: [UIImage], completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: "http://172.20.10.4:8000/post/vaccinations") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
@@ -78,13 +79,16 @@ class APIService {
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        let imageData = image.jpegData(compressionQuality: 0.8) ?? Data()
         var body = Data()
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"files\"; filename=\"scan.jpg\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-        body.append(imageData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        for (idx, image) in images.enumerated() {
+            let imageData = image.jpegData(compressionQuality: 0.8) ?? Data()
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"files\"; filename=\"scan\(idx+1).jpg\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in

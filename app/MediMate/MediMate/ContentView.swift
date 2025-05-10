@@ -131,12 +131,30 @@ struct ContentView: View {
                             .pickerStyle(SegmentedPickerStyle())
 
                             // Preview for image or PDF
-                            if (inputType == .camera || inputType == .photoLibrary), let image = cameraManager.selectedImage {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 200)
-                                    .cornerRadius(8)
+                            if (inputType == .camera || inputType == .photoLibrary), !cameraManager.selectedImages.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(Array(cameraManager.selectedImages.enumerated()), id: \ .offset) { idx, image in
+                                            ZStack(alignment: .topTrailing) {
+                                                Image(uiImage: image)
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 120, height: 120)
+                                                    .cornerRadius(8)
+                                                Button(action: {
+                                                    cameraManager.selectedImages.remove(at: idx)
+                                                }) {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .foregroundColor(.red)
+                                                        .background(Color.white.opacity(0.7))
+                                                        .clipShape(Circle())
+                                                }
+                                                .offset(x: 6, y: -6)
+                                            }
+                                        }
+                                    }
+                                }
+                                .frame(height: 130)
                             } else if inputType == .files, let fileURL = cameraManager.selectedFileURL {
                                 PDFPreview(url: fileURL)
                                     .frame(height: 200)
@@ -145,21 +163,35 @@ struct ContentView: View {
                             }
 
                             // Unified upload button
-                            if (cameraManager.selectedImage != nil || cameraManager.selectedFileURL != nil) {
+                            if (!cameraManager.selectedImages.isEmpty || cameraManager.selectedFileURL != nil) {
                                 if isUploading {
                                     ProgressView("Uploading...")
                                 } else {
                                     Button("Send to API") {
                                         isUploading = true
                                         uploadResult = nil
-                                        APIService.shared.uploadDocument(image: cameraManager.selectedImage, fileURL: cameraManager.selectedFileURL) { result in
-                                            DispatchQueue.main.async {
-                                                isUploading = false
-                                                switch result {
-                                                case .success(let msg):
-                                                    uploadResult = "Upload successful: \(msg)"
-                                                case .failure(let error):
-                                                    uploadResult = "Upload failed: \(error.localizedDescription)"
+                                        if !cameraManager.selectedImages.isEmpty {
+                                            APIService.shared.uploadImages(cameraManager.selectedImages) { result in
+                                                DispatchQueue.main.async {
+                                                    isUploading = false
+                                                    switch result {
+                                                    case .success(let msg):
+                                                        uploadResult = "Upload successful: \(msg)"
+                                                    case .failure(let error):
+                                                        uploadResult = "Upload failed: \(error.localizedDescription)"
+                                                    }
+                                                }
+                                            }
+                                        } else if let fileURL = cameraManager.selectedFileURL {
+                                            APIService.shared.uploadPDF(url: fileURL) { result in
+                                                DispatchQueue.main.async {
+                                                    isUploading = false
+                                                    switch result {
+                                                    case .success(let msg):
+                                                        uploadResult = "Upload successful: \(msg)"
+                                                    case .failure(let error):
+                                                        uploadResult = "Upload failed: \(error.localizedDescription)"
+                                                    }
                                                 }
                                             }
                                         }
@@ -186,13 +218,13 @@ struct ContentView: View {
                                     Label("Select Document", systemImage: "plus")
                                 }
                                 Button(action: {
-                                    cameraManager.selectedImage = nil
+                                    cameraManager.selectedImages = []
                                     cameraManager.selectedFileURL = nil
                                     uploadResult = nil
                                 }) {
                                     Label("Clear Selection", systemImage: "trash")
                                 }
-                                .disabled(cameraManager.selectedImage == nil && cameraManager.selectedFileURL == nil)
+                                .disabled(cameraManager.selectedImages.isEmpty && cameraManager.selectedFileURL == nil)
                             }
                         }
 // MARK: - Unified Document Upload API
@@ -205,12 +237,12 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $cameraManager.isShowingImagePicker) {
             ZStack {
                 Color.black.ignoresSafeArea()
-                ImagePicker(image: $cameraManager.selectedImage)
+                ImagePicker(images: $cameraManager.selectedImages)
                     .edgesIgnoringSafeArea(.all)
             }
         }
         .sheet(isPresented: $cameraManager.isShowingPhotoPicker) {
-            PhotoLibraryPicker(image: $cameraManager.selectedImage)
+            PhotoLibraryPicker(images: $cameraManager.selectedImages)
         }
         .sheet(isPresented: $cameraManager.isShowingDocumentPicker) {
             DocumentPicker(fileURL: $cameraManager.selectedFileURL)
