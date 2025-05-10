@@ -86,7 +86,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
     @Environment(\.presentationMode) private var presentationMode
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf], asCopy: true)
         picker.delegate = context.coordinator
         return picker
     }
