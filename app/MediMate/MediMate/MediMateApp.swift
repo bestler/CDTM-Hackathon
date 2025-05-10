@@ -25,7 +25,9 @@ struct MediMateApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            // Switch between onboarding and old ContentView for testing
+            OnboardingFlowView()
+            // ContentView() // Uncomment to use the old ContentView
         }
         .modelContainer(sharedModelContainer)
     }
