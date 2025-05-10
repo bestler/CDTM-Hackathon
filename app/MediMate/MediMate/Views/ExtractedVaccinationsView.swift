@@ -10,7 +10,10 @@ struct ExtractedVaccinationsView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
+            ZStack {
+                Color(.systemGray6).edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 16) {
                 Text("These are the vaccinations recognized from your document. Please review and correct any information if needed.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -69,6 +72,7 @@ struct ExtractedVaccinationsView: View {
                         .onDelete(perform: deleteVaccination)
                     }
                 }
+                .scrollContentBackground(.hidden)
                 
                 Button(action: {
                     showingAddVaccinationSheet = true
@@ -85,16 +89,18 @@ struct ExtractedVaccinationsView: View {
                 }
                 .padding(.horizontal)
             }
+            }
             .navigationTitle("Extracted Vaccinations")
             .navigationBarItems(
                 trailing: Button(action: {
                     presentationMode.wrappedValue.dismiss()
                 }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
-                        .font(.title2)
+                    Text("Save")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
                 }
             )
+            .background(Color(.systemGray6))
             .sheet(isPresented: $showingAddVaccinationSheet) {
                 addVaccinationView
             }
@@ -104,12 +110,15 @@ struct ExtractedVaccinationsView: View {
     // View for adding a new vaccination
     private var addVaccinationView: some View {
         NavigationView {
-            Form {
+            ZStack {
+                Color(.systemGray6).edgesIgnoringSafeArea(.all)
+                Form {
                 Section(header: Text("New Vaccination Details")) {
                     TextField("Vaccination Name", text: $newVaccinationName)
                     TextField("Doctor", text: $newVaccinationDoctor)
                     TextField("Date (YYYY-MM-DD)", text: $newVaccinationDate)
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Add Vaccination")
             .navigationBarItems(
