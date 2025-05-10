@@ -8,6 +8,8 @@ import HealthKit
 
 class APIService {
 
+    let baseURL = "https://fastapi-service-1056955526781.europe-west3.run.app/"
+
     /// Unified document upload for images and PDFs. If both are provided, uploads both.
     func uploadDocument(images: [UIImage], fileURLs: [URL], completion: @escaping (Result<String, Error>) -> Void) {
         if !images.isEmpty {

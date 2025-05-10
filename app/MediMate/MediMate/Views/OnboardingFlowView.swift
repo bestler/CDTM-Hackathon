@@ -18,7 +18,7 @@ struct OnboardingFlowView: View {
                     .fontWeight(.bold)
                 
                 HStack(spacing: 10) {
-                    Text("Vaccination")
+                    Text(flowViewModel.steps[flowViewModel.currentStepIndex].title)
                         .font(.headline)
                     
                     // Progress bar

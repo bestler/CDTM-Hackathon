@@ -7,7 +7,7 @@ struct HealthKitStepView: View {
             Text("Connect to Your Health Data")
                 .font(.headline)
             if !viewModel.isAuthorized {
-                Button("Connect to Health App") {
+                Button("Import data from Apple Health") {
                     viewModel.requestHealthKit()
                 }
                 .buttonStyle(.borderedProminent)
