@@ -11,9 +11,9 @@ class APIService {
     let baseURL = "https://fastapi-service-1056955526781.europe-west3.run.app/"
 
     /// Unified document upload for images and PDFs. If both are provided, uploads both.
-    func uploadDocument(images: [UIImage], fileURLs: [URL], completion: @escaping (Result<String, Error>) -> Void) {
+    func uploadDocument(endpoint: String, images: [UIImage], fileURLs: [URL], completion: @escaping (Result<String, Error>) -> Void) {
         if !images.isEmpty {
-            self.uploadImages(images) { result in
+            self.uploadImages(images, endpoint: endpoint) { result in
                 if !fileURLs.isEmpty {
                     // If both images and PDFs, upload PDFs after images
                     self.uploadPDFs(urls: fileURLs, completion: completion)
@@ -32,7 +32,7 @@ class APIService {
 
     // Upload Apple Health data as JSON
     func uploadHealthData(_ healthData: AppleHealth, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "https://fastapi-service-1056955526781.europe-west3.run.app/post/appleHealth") else {
+        guard let url = URL(string: baseURL + "post/appleHealth") else {
             print("[APIService] Invalid URL")
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
@@ -80,7 +80,7 @@ class APIService {
     }
 
 
-    func uploadImages(_ images: [UIImage], completion: @escaping (Result<String, Error>) -> Void) {
+    func uploadImages(_ images: [UIImage], endpoint: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: "https://fastapi-service-1056955526781.europe-west3.run.app/post/vaccinations") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
@@ -151,4 +151,64 @@ class APIService {
         }
         task.resume()
     }
+
+    /// Generic function to upload any Codable data to the specified endpoint
+    /// - Parameters:
+    ///   - data: Any data type conforming to Codable
+    ///   - endpoint: API endpoint to send the data to (will be appended to baseURL)
+    ///   - completion: Completion handler that returns a Result with either a response string or an Error
+    func uploadData<T: Codable>(_ data: T, endpoint: String, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let url = URL(string: baseURL + endpoint) else {
+            print("[APIService] Invalid URL for endpoint: \(endpoint)")
+            completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(data)
+            request.httpBody = jsonData
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[APIService] JSON Body for \(endpoint): \(jsonString)")
+            }
+        } catch {
+            print("[APIService] JSON encoding error: \(error)")
+            completion(.failure(error))
+            return
+        }
+        
+        print("[APIService] Sending request to: \(url)")
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("[APIService] Network error: \(error)")
+                completion(.failure(error))
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("[APIService] Response status code: \(httpResponse.statusCode)")
+            } else {
+                print("[APIService] No HTTPURLResponse received")
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+                completion(.failure(NSError(domain: "Server error", code: statusCode)))
+                return
+            }
+            
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("[APIService] Response body: \(responseString)")
+                completion(.success(responseString))
+            } else {
+                completion(.success(""))
+            }
+        }
+        task.resume()
+    }
+
+    
 }

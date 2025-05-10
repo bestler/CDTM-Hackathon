@@ -17,6 +17,10 @@ class ConversationViewModel: ObservableObject, FlowStepViewModel {
 
     var isComplete: Bool { true } // Always allow skip
 
+    func handleSave() {
+        
+    }
+
     func onNext(completion: @escaping (Bool) -> Void) {
         print("Call next")
     }

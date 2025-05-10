@@ -3,6 +3,10 @@ import SwiftUI
 import HealthKit
 
 class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
+    func handleSave() {
+        
+    }
+    
     @Published var isAuthorized = false
     @Published var isUploading = false
     @Published var uploadResult: String? = nil

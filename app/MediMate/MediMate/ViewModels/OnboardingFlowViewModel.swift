@@ -6,6 +6,7 @@ protocol FlowStepViewModel: ObservableObject {
     var title: String { get }
     var isComplete: Bool { get }
     func onNext(completion: @escaping (Bool) -> Void)
+    func handleSave() 
 }
 
 class OnboardingFlowViewModel: ObservableObject {

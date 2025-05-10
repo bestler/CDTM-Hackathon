@@ -3,7 +3,7 @@ import Foundation
 import SwiftUI
 // Make sure InputType is available project-wide
 
-class ScanDocumentViewModel: ObservableObject, FlowStepViewModel {
+class ScanDocumentViewModel: ObservableObject{
     @Published var inputType: InputType = .camera
     @Published var selectedImages: [UIImage] = [] {
         didSet {

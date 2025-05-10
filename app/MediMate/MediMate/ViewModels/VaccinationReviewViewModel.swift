@@ -47,7 +47,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     func uploadAndParseVaccinations() {
         isUploading = true
         uploadError = nil
-        APIService.shared.uploadDocument(images: selectedImages, fileURLs: selectedFileURLs) { [weak self] result in
+        APIService.shared.uploadDocument(endpoint: "post/vaccination", images: selectedImages, fileURLs: selectedFileURLs) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isUploading = false
                 switch result {
@@ -68,6 +68,29 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
         }
     }
 
+    func handleSave() {
+        // Send the current vaccinations with the APIService to the backend
+        isUploading = true
+        uploadError = nil
+        
+        // Send the vaccinations array directly to the backend
+        APIService.shared.uploadData(self.vaccinations, endpoint: "post/json/vaccinations") { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isUploading = false
+                
+                switch result {
+                case .success(let response):
+                    print("Successfully saved vaccinations: \(response)")
+                    // You could add additional success handling here if needed
+                    
+                case .failure(let error):
+                    self?.uploadError = "Failed to save vaccinations: \(error.localizedDescription)"
+                    print("Error saving vaccinations: \(error)")
+                }
+            }
+        }
+    }
+
     // Optionally, allow editing a vaccination in the array
     func updateVaccination(_ vaccination: Vaccination, at index: Int) {
         guard vaccinations.indices.contains(index) else { return }
@@ -83,6 +106,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     }
 
     func onNext(completion: @escaping (Bool) -> Void) {
+        handleSave()
         completion(isComplete)
     }
 }
