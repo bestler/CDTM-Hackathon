@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 import HealthKit
 
+import UIKit
+import PhotosUI
+
 // Add HealthKitManager as an observable object
 @MainActor
 class ContentViewModel: ObservableObject {
@@ -38,6 +41,10 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
     @StateObject private var viewModel = ContentViewModel()
+
+    @StateObject private var cameraManager = CameraManager()
+    @State private var isUploading = false
+    @State private var uploadResult: String? = nil
 
     var body: some View {
         NavigationSplitView {
@@ -87,8 +94,52 @@ struct ContentView: View {
                     }
                 }
             }
+
+            Section(header: Text("Scan Medical Document")) {
+                VStack(spacing: 12) {
+                    if let image = cameraManager.selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .cornerRadius(8)
+                        if isUploading {
+                            ProgressView("Uploading...")
+                        } else {
+                            Button("Send to API") {
+                                isUploading = true
+                                uploadResult = nil
+                                APIService.shared.uploadImage(image) { result in
+                                    DispatchQueue.main.async {
+                                        isUploading = false
+                                        switch result {
+                                        case .success(let msg):
+                                            uploadResult = "Upload successful: \(msg)"
+                                        case .failure(let error):
+                                            uploadResult = "Upload failed: \(error.localizedDescription)"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if let uploadResult = uploadResult {
+                            Text(uploadResult)
+                                .font(.caption)
+                                .foregroundColor(uploadResult.contains("successful") ? .green : .red)
+                        }
+                    }
+                    Button(action: {
+                        cameraManager.isShowingImagePicker = true
+                    }) {
+                        Label("Scan Document", systemImage: "camera")
+                    }
+                }
+            }
         } detail: {
             Text("Select an item")
+        }
+        .sheet(isPresented: $cameraManager.isShowingImagePicker) {
+            ImagePicker(image: $cameraManager.selectedImage)
         }
     }
 

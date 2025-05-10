@@ -29,9 +29,22 @@
 		BC9AC15A2DCEA8CD0051C84A /* MediMateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BCAA26C22DCF4C980090E6AD /* Exceptions for "MediMate" folder in "MediMate" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BC9AC1402DCEA8CB0051C84A /* MediMate */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BC9AC1432DCEA8CB0051C84A /* MediMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BCAA26C22DCF4C980090E6AD /* Exceptions for "MediMate" folder in "MediMate" target */,
+			);
 			path = MediMate;
 			sourceTree = "<group>";
 		};
@@ -401,6 +414,8 @@
 				DEVELOPMENT_TEAM = A653B885WN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MediMate/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We give you the possibilty to scan and upload your medical documents, so that you get the best medical support.";
 				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
@@ -433,6 +448,8 @@
 				DEVELOPMENT_TEAM = A653B885WN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MediMate/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We give you the possibilty to scan and upload your medical documents, so that you get the best medical support.";
 				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We are going to use your health data, to personalize your experience with your doctor and make sure that they have a holistic view about your health. ";
