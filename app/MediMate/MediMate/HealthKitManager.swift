@@ -6,86 +6,149 @@
 import Foundation
 import HealthKit
 
+
+// MARK: - HealthKit Type Structs
+
+protocol HealthDataType {
+    var type: HKSampleType { get }
+    var healthIdentifier: String { get }
+    func defaultPredicate() -> NSPredicate?
+}
+
+struct QuantityHealthDataType: HealthDataType {
+    let identifier: HKQuantityTypeIdentifier
+    let unit: HKUnit
+    let isCumulative: Bool
+    // Adjustable properties
+    static var defaultDays: Int = 30
+    static var defaultSampling: Calendar.Component = .day // can be .day, .weekOfYear, etc.
+
+    var type: HKSampleType { HKQuantityType.quantityType(forIdentifier: identifier)! }
+    var healthIdentifier: String { identifier.rawValue }
+
+    func defaultPredicate() -> NSPredicate? {
+        // Default: last N days
+        let endDate = Date()
+        let startDate = Calendar.current.date(byAdding: .day, value: -Self.defaultDays, to: endDate) ?? endDate
+        return HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+    }
+
+    var statisticsOptions: HKStatisticsOptions {
+        isCumulative ? .cumulativeSum : .discreteAverage
+    }
+
+    // Compute average for cumulative values
+    func average(for sum: Double) -> Double {
+        guard isCumulative else { return sum }
+        return sum / Double(Self.defaultDays)
+    }
+}
+
+struct ECGHealthDataType: HealthDataType {
+    var type: HKSampleType { HKObjectType.electrocardiogramType() }
+    var healthIdentifier: String { "Electrocardiogram (ECG)" }
+    func defaultPredicate() -> NSPredicate? { nil }
+}
+
+// MARK: - HealthKitManager
+
 class HealthKitManager: ObservableObject {
     private let healthStore = HKHealthStore()
     @Published var allData: [String: String] = [:]
 
+    // All supported types as a static property
+    static let supportedTypes: [HealthDataType] = [
+        QuantityHealthDataType(identifier: .stepCount, unit: .count(), isCumulative: true),
+        QuantityHealthDataType(identifier: .distanceWalkingRunning, unit: .meter(), isCumulative: true),
+        QuantityHealthDataType(identifier: .distanceCycling, unit: .meter(), isCumulative: true),
+        QuantityHealthDataType(identifier: .activeEnergyBurned, unit: .kilocalorie(), isCumulative: true),
+        QuantityHealthDataType(identifier: .basalEnergyBurned, unit: .kilocalorie(), isCumulative: true),
+        QuantityHealthDataType(identifier: .dietaryEnergyConsumed, unit: .kilocalorie(), isCumulative: true),
+        QuantityHealthDataType(identifier: .heartRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyMass, unit: .gramUnit(with: .kilo), isCumulative: false),
+        QuantityHealthDataType(identifier: .height, unit: .meter(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyFatPercentage, unit: .percent(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bodyMassIndex, unit: .count(), isCumulative: false),
+        QuantityHealthDataType(identifier: .leanBodyMass, unit: .gramUnit(with: .kilo), isCumulative: false),
+        QuantityHealthDataType(identifier: .restingHeartRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+        QuantityHealthDataType(identifier: .walkingHeartRateAverage, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+        QuantityHealthDataType(identifier: .heartRateVariabilitySDNN, unit: .second(), isCumulative: false),
+        QuantityHealthDataType(identifier: .oxygenSaturation, unit: .percent(), isCumulative: false),
+        QuantityHealthDataType(identifier: .respiratoryRate, unit: HKUnit.count().unitDivided(by: .minute()), isCumulative: false),
+        QuantityHealthDataType(identifier: .bloodPressureSystolic, unit: .millimeterOfMercury(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bloodPressureDiastolic, unit: .millimeterOfMercury(), isCumulative: false),
+        QuantityHealthDataType(identifier: .bloodGlucose, unit: HKUnit.gramUnit(with: .deci).unitDivided(by: .liter()), isCumulative: false),
+        ECGHealthDataType()
+    ]
 
-    // Request authorization for all available quantity types
+    // Instance property for convenience (optional, can be removed if not needed)
+    let supportedTypes: [HealthDataType] = HealthKitManager.supportedTypes
+
+    // Request authorization for all supported types
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
         guard HKHealthStore.isHealthDataAvailable() else {
             completion(false)
             return
         }
-        var typesToRead: Set<HKObjectType> = Set(allQuantityTypeIdentifiers.compactMap { HKQuantityType.quantityType(forIdentifier: $0) })
-        // Add ECG type
-        for type in allElectrocardiogramTypeIdentifiers {
-            typesToRead.insert(type)
-        }
+        let typesToRead: Set<HKObjectType> = Set(supportedTypes.map { $0.type })
         healthStore.requestAuthorization(toShare: [], read: typesToRead) { success, _ in
             completion(success)
         }
     }
 
-    // Fetch all available quantity types' most recent values, and ECG count
+    // Fetch all data using HKStatisticsQuery for quantity types, and count for ECG
     func fetchAllData() {
         var results: [String: String] = [:]
         let group = DispatchGroup()
-        // Quantity types
-        for identifier in allQuantityTypeIdentifiers {
-            guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else { continue }
-            group.enter()
-            let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-            let query = HKSampleQuery(sampleType: type, predicate: nil, limit: 1, sortDescriptors: [sortDescriptor]) { [weak self] _, samples, _ in
-                defer { group.leave() }
-                if let quantitySample = samples?.first as? HKQuantitySample {
-                    let unit = self?.unit(for: identifier) ?? HKUnit.count()
-                    // Defensive: Only convert if compatible
-                    if quantitySample.quantity.is(compatibleWith: unit) {
-                        let value = quantitySample.quantity.doubleValue(for: unit)
-                        results[identifier.rawValue] = String(format: "%.2f", value)
+        for type in supportedTypes {
+            if let quantityType = type as? QuantityHealthDataType, let hkType = quantityType.type as? HKQuantityType {
+                group.enter()
+                let predicate = quantityType.defaultPredicate()
+                let options = quantityType.statisticsOptions
+                let query = HKStatisticsQuery(quantityType: hkType, quantitySamplePredicate: predicate, options: options) { _, statistics, _ in
+                    defer { group.leave() }
+                    var valueString = "No Data"
+                    if quantityType.isCumulative {
+                        if let sum = statistics?.sumQuantity(), sum.is(compatibleWith: quantityType.unit) {
+                            let sumValue = sum.doubleValue(for: quantityType.unit)
+                            let avgValue = quantityType.average(for: sumValue)
+                            valueString = String(format: "%.2f (avg: %.2f)", sumValue, avgValue)
+                        } else if statistics?.sumQuantity() != nil {
+                            valueString = "Incompatible Unit"
+                        }
                     } else {
-                        results[identifier.rawValue] = "Incompatible Unit"
+                        if let avg = statistics?.averageQuantity(), avg.is(compatibleWith: quantityType.unit) {
+                            let value = avg.doubleValue(for: quantityType.unit)
+                            valueString = String(format: "%.2f", value)
+                        } else if statistics?.averageQuantity() != nil {
+                            valueString = "Incompatible Unit"
+                        }
                     }
-                } else {
-                    results[identifier.rawValue] = "No Data"
+                    results[quantityType.healthIdentifier] = valueString
                 }
+                healthStore.execute(query)
+        // Print all averages to the console
+        group.notify(queue: .main) { [weak self] in
+            self?.allData = results
+            print("--- HealthKit 30-day Averages/Sums ---")
+            for (key, value) in results.sorted(by: { $0.key < $1.key }) {
+                print("\(key): \(value)")
             }
-            healthStore.execute(query)
         }
-        // ECG type: count the number of ECG samples
-        if let ecgType = allElectrocardiogramTypeIdentifiers.first as? HKElectrocardiogramType {
-            group.enter()
-            let query = HKSampleQuery(sampleType: ecgType, predicate: nil, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
-                let count = samples?.count ?? 0
-                results["Electrocardiogram (ECG) Count"] = "\(count)"
-                group.leave()
+            } else if type is ECGHealthDataType, let ecgType = type.type as? HKElectrocardiogramType {
+                group.enter()
+                let predicate = type.defaultPredicate()
+                let query = HKSampleQuery(sampleType: ecgType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
+                    let count = samples?.count ?? 0
+                    results[type.healthIdentifier] = "\(count)"
+                    group.leave()
+                }
+                healthStore.execute(query)
             }
-            healthStore.execute(query)
         }
         group.notify(queue: .main) { [weak self] in
             self?.allData = results
         }
     }
-
-    // Helper to get a sensible unit for each type
-    private func unit(for identifier: HKQuantityTypeIdentifier) -> HKUnit {
-        switch identifier {
-        case .stepCount: return HKUnit.count()
-        case .distanceWalkingRunning, .distanceCycling: return HKUnit.meter()
-        case .activeEnergyBurned, .basalEnergyBurned, .dietaryEnergyConsumed: return HKUnit.kilocalorie()
-        case .heartRate, .restingHeartRate, .walkingHeartRateAverage: return HKUnit.count().unitDivided(by: HKUnit.minute())
-        case .bodyMass, .leanBodyMass: return HKUnit.gramUnit(with: .kilo)
-        case .height: return HKUnit.meter()
-        case .bodyFatPercentage: return HKUnit.percent()
-        case .bodyMassIndex: return HKUnit.count()
-        case .oxygenSaturation: return HKUnit.percent()
-        case .respiratoryRate: return HKUnit.count().unitDivided(by: HKUnit.minute())
-        case .bloodPressureSystolic, .bloodPressureDiastolic: return HKUnit.millimeterOfMercury()
-        case .bloodGlucose: return HKUnit.gramUnit(with: .deci).unitDivided(by: HKUnit.liter())
-        case .heartRateVariabilitySDNN: return HKUnit.second()
-        default: return HKUnit.count()
-        }
-    }
-
 }
+
