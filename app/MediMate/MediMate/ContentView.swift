@@ -138,8 +138,12 @@ struct ContentView: View {
         } detail: {
             Text("Select an item")
         }
-        .sheet(isPresented: $cameraManager.isShowingImagePicker) {
-            ImagePicker(image: $cameraManager.selectedImage)
+        .fullScreenCover(isPresented: $cameraManager.isShowingImagePicker) {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                ImagePicker(image: $cameraManager.selectedImage)
+                    .edgesIgnoringSafeArea(.all)
+            }
         }
     }
 
