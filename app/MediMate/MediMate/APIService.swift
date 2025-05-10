@@ -63,14 +63,16 @@ class APIService {
             } else {
                 print("[APIService] No HTTPURLResponse received")
             }
-            if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                print("[APIService] Response body: \(responseString)")
-            }
             guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                 completion(.failure(NSError(domain: "Server error", code: 0)))
                 return
             }
-            completion(.success("Success"))
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("[APIService] Response body: \(responseString)")
+                completion(.success(responseString))
+            } else {
+                completion(.success(""))
+            }
         }
         task.resume()
     }
@@ -103,7 +105,11 @@ class APIService {
                 completion(.failure(error))
                 return
             }
-            completion(.success("Success"))
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                completion(.success(responseString))
+            } else {
+                completion(.success(""))
+            }
         }
         task.resume()
     }
@@ -135,7 +141,11 @@ class APIService {
                 completion(.failure(error))
                 return
             }
-            completion(.success("Success"))
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                completion(.success(responseString))
+            } else {
+                completion(.success(""))
+            }
         }
         task.resume()
     }

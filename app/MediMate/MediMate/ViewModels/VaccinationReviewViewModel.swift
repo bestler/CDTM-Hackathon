@@ -40,10 +40,11 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
                 self?.isUploading = false
                 switch result {
                 case .success(let responseString):
+                    print(responseString)
                     // Try to decode [Vaccination] from responseString
                     if let data = responseString.data(using: .utf8),
-                       let vaccinations = try? JSONDecoder().decode([Vaccination].self, from: data) {
-                        self?.vaccinations = vaccinations
+                       let vaccinationsResponse = try? JSONDecoder().decode(VaccinationResponse.self, from: data) {
+                        self?.vaccinations = vaccinationsResponse.data
                     } else {
                         self?.uploadError = "Failed to parse vaccinations."
                     }
