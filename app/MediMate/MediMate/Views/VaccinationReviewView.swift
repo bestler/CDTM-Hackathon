@@ -53,8 +53,6 @@ struct VaccinationReviewView: View {
                     showingVaccinationsModal = true
                 }
             }
-            
-            // Sheet is attached to the main view to prevent issues when vaccinations array changes
 
             }
         .sheet(isPresented: $showingVaccinationsModal) {

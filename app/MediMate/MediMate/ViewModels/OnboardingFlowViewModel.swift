@@ -18,6 +18,7 @@ class OnboardingFlowViewModel: ObservableObject {
     init() {
         // Initialize steps
         let healthKitVM = HealthKitStepViewModel()
+        let scanDocumentVM = ScanDocumentViewModel()
         let reviewVM = VaccinationReviewViewModel()
         self.steps = [healthKitVM, reviewVM]
     }
