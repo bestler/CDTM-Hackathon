@@ -7,6 +7,17 @@ import HealthKit
 //import HealthModels
 
 class APIService {
+
+    /// Unified document upload for image or PDF. If both are provided, image is preferred.
+    func uploadDocument(image: UIImage?, fileURL: URL?, completion: @escaping (Result<String, Error>) -> Void) {
+        if let image = image {
+            self.uploadImage(image, completion: completion)
+        } else if let fileURL = fileURL {
+            self.uploadPDF(url: fileURL, completion: completion)
+        } else {
+            completion(.failure(NSError(domain: "No file selected", code: 0)))
+        }
+    }
     static let shared = APIService()
     private init() {}
 
@@ -58,7 +69,7 @@ class APIService {
     }
 
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "https://your-api-endpoint.com/upload") else {
+        guard let url = URL(string: "http://172.20.10.4:8000/post/vaccinations") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }
@@ -70,7 +81,7 @@ class APIService {
         let imageData = image.jpegData(compressionQuality: 0.8) ?? Data()
         var body = Data()
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"scan.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"files\"; filename=\"scan.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
         body.append(imageData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)

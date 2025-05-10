@@ -130,48 +130,29 @@ struct ContentView: View {
                             }
                             .pickerStyle(SegmentedPickerStyle())
 
+                            // Preview for image or PDF
                             if (inputType == .camera || inputType == .photoLibrary), let image = cameraManager.selectedImage {
                                 Image(uiImage: image)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(height: 200)
                                     .cornerRadius(8)
-                                if isUploading {
-                                    ProgressView("Uploading...")
-                                } else {
-                                    Button("Send Image to API") {
-                                        isUploading = true
-                                        uploadResult = nil
-                                        APIService.shared.uploadImage(image) { result in
-                                            DispatchQueue.main.async {
-                                                isUploading = false
-                                                switch result {
-                                                case .success(let msg):
-                                                    uploadResult = "Upload successful: \(msg)"
-                                                case .failure(let error):
-                                                    uploadResult = "Upload failed: \(error.localizedDescription)"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                if let uploadResult = uploadResult {
-                                    Text(uploadResult)
-                                        .font(.caption)
-                                        .foregroundColor(uploadResult.contains("successful") ? .green : .red)
-                                }
                             } else if inputType == .files, let fileURL = cameraManager.selectedFileURL {
                                 PDFPreview(url: fileURL)
                                     .frame(height: 200)
                                     .cornerRadius(8)
                                 Text("Selected file: \(fileURL.lastPathComponent)")
+                            }
+
+                            // Unified upload button
+                            if (cameraManager.selectedImage != nil || cameraManager.selectedFileURL != nil) {
                                 if isUploading {
                                     ProgressView("Uploading...")
                                 } else {
-                                    Button("Send PDF to API") {
+                                    Button("Send to API") {
                                         isUploading = true
                                         uploadResult = nil
-                                        APIService.shared.uploadPDF(url: fileURL) { result in
+                                        APIService.shared.uploadDocument(image: cameraManager.selectedImage, fileURL: cameraManager.selectedFileURL) { result in
                                             DispatchQueue.main.async {
                                                 isUploading = false
                                                 switch result {
@@ -214,6 +195,7 @@ struct ContentView: View {
                                 .disabled(cameraManager.selectedImage == nil && cameraManager.selectedFileURL == nil)
                             }
                         }
+// MARK: - Unified Document Upload API
                     }
                 }
                 .padding()
