@@ -53,6 +53,39 @@ struct ECGHealthDataType: HealthDataType {
 // MARK: - HealthKitManager
 
 class HealthKitManager: ObservableObject {
+
+    /// Returns the value to be sent to the API for a given HealthKit identifier key.
+    /// For cumulative types, returns the average (using QuantityHealthDataType logic). For discrete, returns the value.
+    /// Returns the value to be sent to the API for a given HealthKit identifier key.
+    /// For cumulative types, returns the average (using QuantityHealthDataType logic). For discrete, returns the value.
+    func valueForAPI(for key: String) -> Double? {
+        guard let type = supportedTypes.first(where: { $0.healthIdentifier == key }) as? QuantityHealthDataType else {
+            // Not a quantity type or not found
+            return nil
+        }
+        guard let str = allData[key] else { return nil }
+        // If the value string contains both sum and avg (e.g., "123.45 (avg: 4.12)"), extract the avg for cumulative
+        if type.isCumulative {
+            // Try to extract the value inside (avg: ...)
+            if let avgRange = str.range(of: "(avg: ") {
+                let afterAvg = str[avgRange.upperBound...]
+                if let endParen = afterAvg.firstIndex(of: ")") {
+                    let avgString = afterAvg[..<endParen].trimmingCharacters(in: .whitespaces)
+                    if let avg = Double(avgString) {
+                        return avg
+                    }
+                }
+            }
+            // Fallback: if only a number is present, use average logic
+            let numbers = str.components(separatedBy: " ").compactMap { Double($0) }
+            guard let sum = numbers.first else { return nil }
+            return type.average(for: sum)
+        } else {
+            // For discrete, just return the first number
+            let numbers = str.components(separatedBy: " ").compactMap { Double($0) }
+            return numbers.first
+        }
+    }
     private let healthStore = HKHealthStore()
     @Published var allData: [String: String] = [:]
 

@@ -178,7 +178,8 @@ extension HealthKitManager {
     func toAppleHealth() -> AppleHealth {
         // Helper to extract Double from allData
         func extract(_ key: String) -> Double? {
-            allData[key]?.components(separatedBy: " ").first.flatMap { Double($0) }
+            // Use the new centralized logic from HealthKitManager
+            return valueForAPI(for: key)
         }
 
         let activity = Activity(
