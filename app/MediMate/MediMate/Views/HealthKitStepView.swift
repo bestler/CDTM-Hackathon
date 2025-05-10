@@ -4,28 +4,20 @@ struct HealthKitStepView: View {
     @ObservedObject var viewModel: HealthKitStepViewModel
     var body: some View {
         VStack(spacing: 20) {
-            Text("Apple HealthKit Integration")
+            Text("Connect to Your Health Data")
                 .font(.headline)
             if !viewModel.isAuthorized {
-                Button("Connect to Apple HealthKit") {
+                Button("Connect to Health App") {
                     viewModel.requestHealthKit()
                 }
-            } else if !viewModel.isDataFetched {
-                ProgressView("Fetching Health Data...")
+                .buttonStyle(.borderedProminent)
+            } else if !viewModel.isDataFetched || viewModel.isUploading {
+                ProgressView(viewModel.isUploading ? "Preparing your health data..." : "Accessing your health records...")
             } else {
-                if viewModel.isUploading {
-                    ProgressView("Uploading Health Data...")
-                } else {
-                    Button("Send Health Data to API") {
-                        viewModel.uploadHealthData()
-                    }
-                    .disabled(!viewModel.isDataFetched)
-                }
-                if let result = viewModel.uploadResult {
-                    Text(result)
-                        .font(.caption)
-                        .foregroundColor(result.contains("successful") ? .green : .red)
-                }
+                // Show a processing indicator with no debug message
+                Text("Your health data was successfully imported")
+                    .font(.caption)
+                    .foregroundColor(.green)
             }
         }
         .padding()

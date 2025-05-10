@@ -8,7 +8,7 @@ class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
     @Published var uploadResult: String? = nil
     @Published var isDataFetched = false
     let healthKitManager = HealthKitManager()
-    var title: String { "Apple HealthKit" }
+    var title: String { "Import Health Data" }
     var isComplete: Bool { true } // Always allow skipping
 
     func requestHealthKit() {
@@ -28,10 +28,12 @@ class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
         // Wait for allData to be updated (since fetchAllData is async)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.isDataFetched = true
+            // Automatically upload health data as soon as it's fetched
+            self.uploadHealthData()
         }
     }
 
-    func uploadHealthData() {
+    func uploadHealthData(autoNavigate: Bool = true) {
         guard isDataFetched else { return }
         isUploading = true
         uploadResult = nil
@@ -42,14 +44,40 @@ class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
                 switch result {
                 case .success(let msg):
                     self?.uploadResult = "Upload successful: \(msg)"
+                    if autoNavigate {
+                        // Add a small delay to show the success message before navigating
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            self?.triggerNavigation()
+                        }
+                    }
                 case .failure(let error):
                     self?.uploadResult = "Upload failed: \(error.localizedDescription)"
                 }
             }
         }
     }
+    
+    private func triggerNavigation() {
+        // Call onNext with completion handler to navigate to the next step
+        onNext { _ in
+            // Navigation is handled by the OnboardingFlowView
+        }
+    }
 
     func onNext(completion: @escaping (Bool) -> Void) {
-        completion(isComplete)
+        // If we've already completed the upload, navigate immediately
+        if isDataFetched && !isUploading && uploadResult != nil {
+            completion(true)
+        } else if isAuthorized && !isUploading {
+            // If authorized but not uploading, start upload and navigate after
+            uploadHealthData(autoNavigate: false)
+            // Add a delay to wait for upload to potentially complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                completion(true)
+            }
+        } else {
+            // Always allow skipping as per the original implementation
+            completion(isComplete)
+        }
     }
 }
