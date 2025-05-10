@@ -30,17 +30,14 @@ from models import (
 from llm import get_vac_from_images
 import base64
 import logging
+import fitz
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# In-memory storage for posted data
 data_store = {}
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Update endpoints to use camelCase keys
 @app.post("/post/generalInformation")
 async def post_general_information(payload: GeneralInformation):
     logging.info("POST /post/generalInformation called with payload: %s", payload.model_dump())
@@ -75,11 +72,31 @@ async def post_vaccinations(files: list[UploadFile] = File(...)):
     images = []
     for file in files:
         image_bytes = await file.read()
-        base64_image = base64.b64encode(image_bytes).decode("utf-8")
-        images.append({
-            "type": "image_url",
-            "image_url": f"data:image/jpeg;base64,{base64_image}"
-        })
+
+        # Support for PDF files
+        if file.content_type == "application/pdf":
+            try:
+                with fitz.open(stream=image_bytes, filetype="pdf") as doc:
+                    for page in doc:
+                        pix = page.get_pixmap(dpi=200)
+                        img_bytes = pix.tobytes("jpeg")
+                        base64_jpg = base64.b64encode(img_bytes).decode("utf-8")
+                        images.append({
+                            "type": "image_url",
+                            "image_url": f"data:image/jpeg;base64,{base64_jpg}"
+                        })
+            except Exception as e:
+                logging.error("Failed to convert PDF to JPG: %s", e)
+                raise HTTPException(status_code=400, detail=f"Failed to convert PDF to JPG: {e}")
+
+        # Support for image files
+        else:
+            base64_image = base64.b64encode(image_bytes).decode("utf-8")
+            images.append({
+                "type": "image_url",
+                "image_url": f"data:{file.content_type};base64,{base64_image}"
+            })
+
     try:
         vaccinations: list[Vaccination] = get_vac_from_images(images)
         logging.info("Vaccination extraction successful, %d records found", len(vaccinations))

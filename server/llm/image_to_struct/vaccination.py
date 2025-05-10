@@ -10,7 +10,7 @@ load_dotenv()
 model: str = "mistral-medium-latest"
 prompt: str = "Extract and return the vaccination details in the specified JSON format." \
 "Check every entry in the images." \
-"What out that there can be multiple pages in the images."
+"Please return syntax correct JSON format."
 
 def get_vac_from_images(images) -> list[Vaccination]:
     api_key = os.environ.get("MISTRAL_API_KEY")
@@ -63,6 +63,7 @@ def get_vac_from_images(images) -> list[Vaccination]:
         raise ValueError(f"Error processing images with Mistral: {e}")
 
     result = chat_response.choices[0].message.content
+    print(result)
     if isinstance(result, str):
         try:
             result = json.loads(result)
