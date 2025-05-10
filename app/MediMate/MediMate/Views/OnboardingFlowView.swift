@@ -13,8 +13,6 @@ struct OnboardingFlowView: View {
             Group {
                 if let healthKitVM = flowViewModel.currentStep as? HealthKitStepViewModel {
                     HealthKitStepView(viewModel: healthKitVM)
-                } else if let scanVM = flowViewModel.currentStep as? ScanDocumentViewModel {
-                    ScanDocumentView(viewModel: scanVM)
                 } else if let reviewVM = flowViewModel.currentStep as? VaccinationReviewViewModel {
                     VaccinationReviewView(viewModel: reviewVM)
                 } else {

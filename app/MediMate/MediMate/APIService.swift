@@ -30,7 +30,7 @@ class APIService {
 
     // Upload Apple Health data as JSON
     func uploadHealthData(_ healthData: AppleHealth, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "http://172.20.10.4:8000/post/appleHealth") else {
+        guard let url = URL(string: "https://fastapi-service-1056955526781.europe-west3.run.app/post/appleHealth") else {
             print("[APIService] Invalid URL")
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
@@ -77,7 +77,7 @@ class APIService {
 
 
     func uploadImages(_ images: [UIImage], completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "http://172.20.10.4:8000/post/vaccinations") else {
+        guard let url = URL(string: "https://fastapi-service-1056955526781.europe-west3.run.app/post/vaccinations") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }

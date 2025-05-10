@@ -9,8 +9,6 @@ struct ScanDocumentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Vaccination Document Upload")
-                .font(.headline)
 
             VStack(spacing: 12) {
                 Button(action: { showCamera = true }) {
@@ -90,26 +88,7 @@ struct ScanDocumentView: View {
                 }
             }
 
-            if viewModel.isUploading {
-                ProgressView("Uploading...")
-            } else if viewModel.uploadResult == nil {
-                Button("Upload & Continue") {
-                    viewModel.uploadAndContinue()
-                }
-                .disabled(viewModel.selectedImages.isEmpty && viewModel.selectedFileURLs.isEmpty)
-            }
-            if let error = viewModel.uploadError {
-                Text(error)
-                    .foregroundColor(.red)
-            }
-
-            // Show review if uploadResult is available
-            if let vaccination = viewModel.uploadResult {
-                Divider().padding(.vertical, 8)
-                Text("Extracted Vaccination Info")
-                    .font(.subheadline)
-                VaccinationReviewView(viewModel: .init())
-            }
+            // Uploading and error state are now handled in the review step, not here.
         }
         .sheet(isPresented: $showCamera) {
             ImagePicker(images: $viewModel.selectedImages)

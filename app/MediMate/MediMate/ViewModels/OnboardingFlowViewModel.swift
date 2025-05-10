@@ -18,14 +18,8 @@ class OnboardingFlowViewModel: ObservableObject {
     init() {
         // Initialize steps
         let healthKitVM = HealthKitStepViewModel()
-        let scanVM = ScanDocumentViewModel()
         let reviewVM = VaccinationReviewViewModel()
-        self.steps = [healthKitVM, scanVM, reviewVM]
-        // Pass data between steps as needed
-        scanVM.onScanCompleted = { [weak self, weak reviewVM] vaccination in
-            self?.vaccination = vaccination
-            reviewVM?.prefill(with: vaccination)
-        }
+        self.steps = [healthKitVM, reviewVM]
     }
 
     var currentStep: any FlowStepViewModel {
