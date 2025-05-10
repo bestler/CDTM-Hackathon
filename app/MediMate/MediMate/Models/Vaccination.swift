@@ -1,6 +1,6 @@
 import Foundation
 
-struct Vaccination: Codable {
+struct Vaccination: Codable, Equatable {
     var vaccineName: String
     var date: String
     var lotNumber: String
