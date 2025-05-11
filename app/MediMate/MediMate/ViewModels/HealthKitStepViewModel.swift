@@ -15,7 +15,7 @@ class HealthKitStepViewModel: ObservableObject, FlowStepViewModel {
     var title: String { "Import Health Data" }
     var isComplete: Bool { true } // Always allow skipping
     var isStaticVideo: Bool { true }
-    var videoName: String { "greeting_insurance_card" }
+    var videoName: String { "apple_health" }
 
     func requestHealthKit() {
         healthKitManager.requestAuthorization { [weak self] success in

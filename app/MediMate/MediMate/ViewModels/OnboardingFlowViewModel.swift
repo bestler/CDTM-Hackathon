@@ -34,12 +34,16 @@ class OnboardingFlowViewModel: ObservableObject {
 
     func nextStep() {
         if currentStepIndex < steps.count - 1 {
+            // Using objectWillChange to ensure UI updates properly
+            objectWillChange.send()
             currentStepIndex += 1
         }
     }
     
     func previousStep() {
         if currentStepIndex > 0 {
+            // Using objectWillChange to ensure UI updates properly
+            objectWillChange.send()
             currentStepIndex -= 1
         }
     }

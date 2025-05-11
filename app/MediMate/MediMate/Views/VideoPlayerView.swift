@@ -6,9 +6,12 @@ struct VideoPlayerView: View {
     let videoURL: URL
     @State private var player: AVPlayer?
     @State private var isVideoFinished = false
+    // Add an ID property to force view recreation when the view changes
+    let id: UUID
     
     init(url: URL) {
         self.videoURL = url
+        self.id = UUID() // Generate a unique ID each time
         _player = State(initialValue: AVPlayer(url: videoURL))
         
         // Configure audio session to play even in silent mode

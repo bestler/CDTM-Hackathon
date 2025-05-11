@@ -27,7 +27,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     var title: String { "Vaccination" }
     var isComplete: Bool { true }
     var isStaticVideo: Bool { true }
-    var videoName: String { "greeting_insurance_card" }
+    var videoName: String { "vaccination" }
 
     // Custom initializer
     init(scanViewModel: ScanDocumentViewModel = ScanDocumentViewModel()) {

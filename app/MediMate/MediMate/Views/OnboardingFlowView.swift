@@ -48,12 +48,13 @@ struct OnboardingFlowView: View {
                 .padding(.top)
             
             ScrollView {
-                // Video player
+                // Video player with key to force refresh when currentStepIndex changes
                 if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
                     VideoPlayerView(url: videoURL)
                         .frame(height: 180)
                         .cornerRadius(10)
                         .padding()
+                        .id(flowViewModel.currentStepIndex) // Force view recreation when step changes
                 }
                 
                 // Step content
