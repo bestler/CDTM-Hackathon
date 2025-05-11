@@ -193,7 +193,7 @@ struct ExtractedGeneralInfoView: View {
             .navigationBarItems(
                 trailing: Button(action: {
                     // Save and dismiss
-                    viewModel.handleSave()
+                    //viewModel.handleSave()
                     viewModel.isManualEntry = false
                     presentationMode.wrappedValue.dismiss()
                 }) {

@@ -47,7 +47,7 @@ class VaccinationReviewViewModel: ObservableObject, FlowStepViewModel {
     func uploadAndParseVaccinations() {
         isUploading = true
         uploadError = nil
-        APIService.shared.uploadDocument(endpoint: "post/vaccination", images: selectedImages, fileURLs: selectedFileURLs) { [weak self] result in
+        APIService.shared.uploadDocument(endpoint: "post/vaccinations", images: selectedImages, fileURLs: selectedFileURLs) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isUploading = false
                 switch result {
