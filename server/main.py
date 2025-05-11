@@ -283,3 +283,9 @@ async def post_medications_json(payload: list[Medication]):
     logging.info("POST /post/json/medications called with payload: %s", [m.model_dump() for m in payload])
     data_store["medications"] = [m.model_dump() for m in payload]
     return JSONResponse(content={"message": "medications saved successfully.", "data": data_store["medications"]})
+
+@app.post("/post/avatar")
+async def post_avatar():
+    logging.info("POST /post/avatar called")
+    avatar_result = await llm.start()
+    return JSONResponse(content={"message": "Avatar successfully started.", "result": avatar_result})
