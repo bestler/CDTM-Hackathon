@@ -56,11 +56,13 @@ struct VideoPlayerView: View {
                 )
                 
                 // Deactivate audio session
+                /*
                 do {
                     try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
                 } catch {
                     print("Failed to deactivate audio session: \(error)")
                 }
+                 */
             }
     }
 }

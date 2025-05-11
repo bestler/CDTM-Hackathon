@@ -41,22 +41,30 @@ struct OnboardingFlowView: View {
             .padding()
             .background(Color.white)
             .shadow(radius: 1)
-            
+
+            /*
             // Step title
             Text(flowViewModel.currentStep.title)
                 .font(.title)
                 .padding(.top)
-            
+             */
+
             ScrollView {
                 // Video player with key to force refresh when currentStepIndex changes
-                if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
+                if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov"), flowViewModel.steps[flowViewModel.currentStepIndex].isStaticVideo == true {
                     VideoPlayerView(url: videoURL)
                         .frame(height: 180)
                         .cornerRadius(10)
                         .padding()
                         .id(flowViewModel.currentStepIndex) // Force view recreation when step changes
+                } else {
+                    AvatarView()
+                        .frame(height: 500)
+                        .cornerRadius(10)
+                        .padding()
+                    .id(flowViewModel.currentStepIndex) 
                 }
-                
+
                 // Step content
                 Group {
                     if let healthKitVM = flowViewModel.currentStep as? HealthKitStepViewModel {
@@ -90,7 +98,8 @@ struct OnboardingFlowView: View {
                     flowViewModel.currentStep.onNext { success in
                         if success {
                             if flowViewModel.isLastStep {
-                                // Handle finish
+                                print("Setting showSubmissionSuccess to true") // Debugging log
+                                flowViewModel.showSubmissionSuccess = true
                             } else {
                                 flowViewModel.nextStep()
                             }
@@ -99,6 +108,9 @@ struct OnboardingFlowView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(!flowViewModel.currentStep.isComplete)
+                .fullScreenCover(isPresented: $flowViewModel.showSubmissionSuccess) {
+                    SubmissionSuccessView()
+                }
             }
             .padding()
         }

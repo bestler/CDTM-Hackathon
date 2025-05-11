@@ -18,6 +18,7 @@ class OnboardingFlowViewModel: ObservableObject {
     @Published var vaccination: Vaccination? = nil
     @Published var generalInfo: GeneralInformation? = nil
     // Add more data as needed
+    @Published var showSubmissionSuccess: Bool = false // New state for showing success view
 
     init() {
         // Initialize steps

@@ -24,7 +24,7 @@ class ConversationViewModel: ObservableObject, FlowStepViewModel {
     }
 
     func onNext(completion: @escaping (Bool) -> Void) {
-        print("Call next")
+        completion(isComplete)
     }
     
 

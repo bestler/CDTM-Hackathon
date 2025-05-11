@@ -9,10 +9,10 @@ struct GeneralInformationView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Personal Information Document")
                     .font(.title2)
-                    .padding(.top)
+                    //.padding(.top)
                 
                 if viewModel.generalInformation == nil {
-                    Text("Upload your ID or other personal document by scanning with the camera, selecting from your photos, or choosing PDF files. Or you can manually enter your personal information.")
+                    Text("Upload your eGK (Gesundheitskarte) by scanning with the camera, selecting from your photos, or choosing PDF files. Or you can manually enter your personal information.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding(.bottom, 4)

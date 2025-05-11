@@ -9,7 +9,7 @@ struct VaccinationReviewView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Vaccination Documents")
                     .font(.title2)
-                    .padding(.top)
+                    //.padding(.top)
 
                 if viewModel.vaccinations.isEmpty {
                     Text("Upload your vaccination documents by scanning with the camera, selecting from your photos, or choosing PDF files. Or you can manually enter your vaccination information.")

@@ -19,23 +19,16 @@ struct AvatarView: View {
 
     var body: some View {
         RoomScope(url: wsURL, token: token, connect: true, enableCamera: true, enableMicrophone: true) {
-            ScrollView {
-                LazyVStack {
                     ForEachParticipant { participant in
-                        VStack {
-                            if (participant.identity?.description == "bey-avatar-agent") {
+                        if (participant.identity?.description == "bey-avatar-agent") {
+                            VStack {
                                 ForEachTrack(filter: .video) { trackReference in
                                     VideoTrackView(trackReference: trackReference)
                                 }
                             }
                         }
-                        .padding()
-                        .border(Color.gray)
                     }
-                }
-                .padding()
             }
-        }
     }
 }
 
