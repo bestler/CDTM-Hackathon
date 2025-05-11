@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, RoomOutputOptions
+from livekit.agents import AgentSession, Agent, RoomInputOptions, RoomOutputOptions, ModelSettings
 from livekit.plugins import (
     openai,
     google,
@@ -12,13 +12,32 @@ from livekit.plugins import (
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from gemini_llm import GeminiLLM
+from typing import AsyncIterable, AsyncGenerator
+from livekit.agents import stt
  
+from livekit import rtc
 load_dotenv()
 
 
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(instructions="You are a helpful voice AI assistant.")
+    
+    async def stt_node(
+        self, audio: AsyncIterable[rtc.AudioFrame], model_settings: ModelSettings
+    ) -> AsyncGenerator[stt.SpeechEvent, None]:
+        # Call the default implementation
+        async for event in Agent.default.stt_node(self, audio, model_settings):
+            for txt in event.alternatives:
+                print(txt.text)
+
+            # if event.is_final:
+            #     print("🗣 Final transcript:", event.text)
+            # else:
+            #     print("⏳ Partial transcript:", event.text)
+
+            yield event
+
 
 
 async def entrypoint(ctx: agents.JobContext):
@@ -44,6 +63,7 @@ async def entrypoint(ctx: agents.JobContext):
     # await avatar.start(session, room=ctx.room)
 
     print(f"Joining room: {ctx.room.name}")
+
     await session.start(
             agent=Assistant(),
             room=ctx.room,
