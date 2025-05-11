@@ -16,13 +16,13 @@ class APIService {
             self.uploadImages(images, endpoint: endpoint) { result in
                 if !fileURLs.isEmpty {
                     // If both images and PDFs, upload PDFs after images
-                    self.uploadPDFs(urls: fileURLs, completion: completion)
+                    self.uploadPDFs(urls: fileURLs, endpoint: endpoint, completion: completion)
                 } else {
                     completion(result)
                 }
             }
         } else if !fileURLs.isEmpty {
-            self.uploadPDFs(urls: fileURLs, completion: completion)
+            self.uploadPDFs(urls: fileURLs, endpoint: endpoint, completion: completion)
         } else {
             completion(.failure(NSError(domain: "No file selected", code: 0)))
         }
@@ -81,7 +81,7 @@ class APIService {
 
 
     func uploadImages(_ images: [UIImage], endpoint: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "https://fastapi-service-1056955526781.europe-west3.run.app/post/vaccinations") else {
+        guard let url = URL(string: baseURL + endpoint) else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }
@@ -116,8 +116,8 @@ class APIService {
         task.resume()
     }
 
-    func uploadPDFs(urls: [URL], completion: @escaping (Result<String, Error>) -> Void) {
-        guard let apiURL = URL(string: "http://172.20.10.4:8000/post/vaccinations") else {
+    func uploadPDFs(urls: [URL], endpoint: String, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let apiURL = URL(string: baseURL + endpoint) else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }

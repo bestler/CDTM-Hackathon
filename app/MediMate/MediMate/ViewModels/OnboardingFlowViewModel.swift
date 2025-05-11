@@ -15,14 +15,16 @@ class OnboardingFlowViewModel: ObservableObject {
     
     // Collected data from steps
     @Published var vaccination: Vaccination? = nil
+    @Published var generalInfo: GeneralInformation? = nil
     // Add more data as needed
 
     init() {
         // Initialize steps
+        let generalInfoVM = GeneralInformationViewModel()
         let healthKitVM = HealthKitStepViewModel()
         let vaccination = VaccinationReviewViewModel()
         let conversationVM = ConversationViewModel()
-        self.steps = [healthKitVM, vaccination, conversationVM]
+        self.steps = [generalInfoVM, healthKitVM, vaccination, conversationVM]
     }
 
     var currentStep: any FlowStepViewModel {
