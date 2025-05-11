@@ -49,20 +49,12 @@ struct OnboardingFlowView: View {
             
             ScrollView {
                 // Video player
-                VStack {
-                    if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
-                        VideoPlayerView(url: videoURL)
-                            .frame(height: 250)
-                            .cornerRadius(10)
-                            .padding()
-                    } else {
-                        Text("Video not found")
-                            .frame(height: 150)
-                            .padding()
-                            .foregroundColor(.red)
-                    }
+                if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
+                    VideoPlayerView(url: videoURL)
+                        .frame(height: 250)
+                        .cornerRadius(10)
+                        .padding()
                 }
-                .padding()
                 
                 // Step content
                 Group {

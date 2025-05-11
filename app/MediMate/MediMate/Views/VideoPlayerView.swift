@@ -4,6 +4,7 @@ import AVKit
 struct VideoPlayerView: View {
     let videoURL: URL
     @State private var player: AVPlayer?
+    @State private var isVideoFinished = false
     
     init(url: URL) {
         self.videoURL = url
@@ -11,25 +12,28 @@ struct VideoPlayerView: View {
     }
     
     var body: some View {
-        VideoPlayer(player: player)
-            .aspectRatio(contentMode: .fill)
-            .edgesIgnoringSafeArea(.all)
-            .disabled(true) // Disables user interaction with the player
-            .onAppear() {
-                // Configure player for autoplay
-                player?.isMuted = false
-                player?.play()
-                
-                // Add observer to replay video when it ends
-                NotificationCenter.default.addObserver(
-                    forName: .AVPlayerItemDidPlayToEndTime,
-                    object: player?.currentItem,
-                    queue: .main
-                ) { _ in
-                    player?.seek(to: CMTime.zero)
-                    player?.play()
-                }
+        Group {
+            if !isVideoFinished {
+                VideoPlayer(player: player)
+                    .aspectRatio(contentMode: .fill)
+                    .edgesIgnoringSafeArea(.all)
+                    .disabled(true) // Disables user interaction with the player
+                    .onAppear() {
+                        // Configure player for autoplay
+                        player?.isMuted = false
+                        player?.play()
+                        
+                        // Add observer to hide video when it ends
+                        NotificationCenter.default.addObserver(
+                            forName: .AVPlayerItemDidPlayToEndTime,
+                            object: player?.currentItem,
+                            queue: .main
+                        ) { _ in
+                            isVideoFinished = true
+                        }
+                    }
             }
+        }
             .onDisappear() {
                 // Clean up
                 player?.pause()
