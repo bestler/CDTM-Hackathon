@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import AVFoundation
 
 struct VideoPlayerView: View {
     let videoURL: URL
@@ -9,6 +10,14 @@ struct VideoPlayerView: View {
     init(url: URL) {
         self.videoURL = url
         _player = State(initialValue: AVPlayer(url: videoURL))
+        
+        // Configure audio session to play even in silent mode
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to set audio session category: \(error)")
+        }
     }
     
     var body: some View {
@@ -42,6 +51,13 @@ struct VideoPlayerView: View {
                     name: .AVPlayerItemDidPlayToEndTime,
                     object: player?.currentItem
                 )
+                
+                // Deactivate audio session
+                do {
+                    try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                } catch {
+                    print("Failed to deactivate audio session: \(error)")
+                }
             }
     }
 }
