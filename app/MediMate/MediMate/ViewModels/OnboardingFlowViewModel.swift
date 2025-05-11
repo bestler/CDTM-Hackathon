@@ -5,6 +5,7 @@ protocol FlowStepViewModel: ObservableObject {
     var isStaticVideo: Bool { get }
     var title: String { get }
     var isComplete: Bool { get }
+    var videoName: String { get }
     func onNext(completion: @escaping (Bool) -> Void)
     func handleSave() 
 }

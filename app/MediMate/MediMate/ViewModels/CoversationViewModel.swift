@@ -14,6 +14,8 @@ class ConversationViewModel: ObservableObject, FlowStepViewModel {
 
 
     var title: String { "Share Additional Information" }
+    
+    var videoName: String { "greeting_insurance_card" }
 
     var isComplete: Bool { true } // Always allow skip
 

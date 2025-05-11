@@ -25,6 +25,7 @@ class GeneralInformationViewModel: ObservableObject, FlowStepViewModel {
     var title: String { "General Information" }
     var isComplete: Bool { true }
     var isStaticVideo: Bool { true }
+    var videoName: String { "greeting_insurance_card" }
     
     // Custom initializer
     init(scanViewModel: ScanDocumentViewModel = ScanDocumentViewModel()) {

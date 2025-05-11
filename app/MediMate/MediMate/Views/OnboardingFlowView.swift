@@ -1,4 +1,5 @@
 import SwiftUI
+import AVKit
 
 struct OnboardingFlowView: View {
     @StateObject var flowViewModel = OnboardingFlowViewModel()
@@ -47,25 +48,19 @@ struct OnboardingFlowView: View {
                 .padding(.top)
             
             ScrollView {
-                // Placeholder for Avatar - now shown on all screens
+                // Video player
                 VStack {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                            .foregroundColor(.gray)
+                    if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
+                        VideoPlayerView(url: videoURL)
+                            .frame(height: 250)
+                            .cornerRadius(10)
+                            .padding()
+                    } else {
+                        Text("Video not found")
                             .frame(height: 150)
                             .padding()
-                        
-                        Image(systemName: "person")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.red)
                     }
-                    
-                    Text("Placeholder for Avatar")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
                 }
                 .padding()
                 
