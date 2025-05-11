@@ -51,7 +51,7 @@ struct OnboardingFlowView: View {
                 // Video player
                 if let videoURL = Bundle.main.url(forResource: flowViewModel.currentStep.videoName, withExtension: "mov") {
                     VideoPlayerView(url: videoURL)
-                        .frame(height: 250)
+                        .frame(height: 180)
                         .cornerRadius(10)
                         .padding()
                 }
